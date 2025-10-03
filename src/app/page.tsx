@@ -1,5 +1,5 @@
-import { DirectoryUploader } from "@/features/file-uploader/components/directory-uploader";
+import { ProjectsList } from "@/features/projects/components/projects-list";
 
 export default function Page() {
-  return <DirectoryUploader />;
+  return <ProjectsList />;
 }

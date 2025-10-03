@@ -14,7 +14,9 @@ export const DirectoryUploader = () => {
   const [isZipping, setIsZipping] = useState(false);
 
   const trpc = useTRPC();
-  const { mutateAsync: upload } = useMutation(trpc.upload.mutationOptions());
+  const { mutateAsync: upload } = useMutation(
+    trpc.fileUpload.upload.mutationOptions(),
+  );
 
   const onSelect = (e: ChangeEvent<HTMLInputElement>) => {
     setFiles(e.target.files);
