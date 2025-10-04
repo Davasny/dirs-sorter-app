@@ -48,7 +48,7 @@ export const fileUploaderRouter = router({
             await fs.writeFile(destPath, content);
           }
 
-          newFiles.push(destPath);
+          newFiles.push(filename);
         }),
       );
 
