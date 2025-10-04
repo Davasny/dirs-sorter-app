@@ -7,9 +7,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { blobToBase64 } from "@/features/file-uploader/utils/blob-to-base64";
 import { useTRPC } from "@/lib/trpc/client";
 
-export const DirectoryUploader = () => {
+export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
   const [files, setFiles] = useState<FileList | null>(null);
   const [isZipping, setIsZipping] = useState(false);
 
@@ -44,8 +45,11 @@ export const DirectoryUploader = () => {
         compressionOptions: { level: 6 },
       });
 
-      const bytes = new Uint8Array(await zipBlob.arrayBuffer());
-      await upload(bytes);
+      const base64Zip = await blobToBase64(zipBlob);
+      await upload({
+        zipContent: base64Zip,
+        projectId,
+      });
 
       toast.success("Uploaded!");
       setFiles(null);

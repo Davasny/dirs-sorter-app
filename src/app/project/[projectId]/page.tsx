@@ -1,3 +1,5 @@
+import { DirectoryUploader } from "@/features/file-uploader/components/directory-uploader";
+
 export default async function Page({
   params,
 }: {
@@ -5,5 +7,10 @@ export default async function Page({
 }) {
   const { projectId } = await params;
 
-  return <div>project id: {projectId}</div>;
+  return (
+    <div>
+      project id: {projectId}
+      <DirectoryUploader projectId={projectId} />
+    </div>
+  );
 }
