@@ -3,7 +3,7 @@ import path from "node:path";
 import JSZip from "jszip";
 import { v7 as uuidv7 } from "uuid";
 import { z } from "zod";
-import { filesTable } from "@/features/project-files/db";
+import { filesTable, type IProjectFileInsert } from "@/features/project-files/db";
 import { db } from "@/lib/db/client";
 import { logger } from "@/lib/logger";
 import { publicProcedure, router } from "@/lib/trpc/trpc";
@@ -34,11 +34,24 @@ export const fileUploaderRouter = router({
       await fs.mkdir(extractDir, { recursive: true });
 
       const zip = await JSZip.loadAsync(zipBuffer);
-      const newFiles: string[] = [];
+      const newFiles: IProjectFileInsert[] = [];
+
+      const topLevelPrefix = (() => {
+        const firstEntry = Object.keys(zip.files)[0];
+        const match = firstEntry.match(/^([^/]+)\//);
+        return match ? match[1] : null;
+      })();
 
       await Promise.all(
         Object.entries(zip.files).map(async ([filename, file]) => {
-          const destPath = path.join(extractDir, filename);
+          const cleanName =
+            topLevelPrefix && filename.startsWith(`${topLevelPrefix}/`)
+              ? filename.slice(topLevelPrefix.length + 1)
+              : filename;
+
+          if (!cleanName) return; // skip empty paths (top-level folder itself)
+
+          const destPath = path.join(extractDir, cleanName);
 
           if (file.dir) {
             await fs.mkdir(destPath, { recursive: true });
@@ -48,14 +61,15 @@ export const fileUploaderRouter = router({
             await fs.writeFile(destPath, content);
           }
 
-          newFiles.push(filename);
+          newFiles.push({
+            filePath: cleanName,
+            projectId,
+            serverPath: destPath,
+          });
         }),
       );
 
-      await db
-        .insert(filesTable)
-        .values(newFiles.map((f) => ({ filePath: f, projectId })))
-        .onConflictDoNothing();
+      await db.insert(filesTable).values(newFiles).onConflictDoNothing();
 
       return { id, filePath };
     }),

@@ -1,0 +1,1 @@
+ALTER TABLE "files" ADD COLUMN "server_path" text NOT NULL;

@@ -14,6 +14,8 @@ export const filesTable = pgTable(
       .notNull(),
 
     filePath: text("file_path").notNull(),
+
+    serverPath: text("server_path").unique().notNull(),
   },
   (table) => ({
     uniqueFilePathPerProject: uniqueIndex("unique_file_path_per_project").on(
@@ -22,3 +24,6 @@ export const filesTable = pgTable(
     ),
   }),
 );
+
+export type IProjectFile = typeof filesTable.$inferSelect;
+export type IProjectFileInsert = typeof filesTable.$inferInsert;
