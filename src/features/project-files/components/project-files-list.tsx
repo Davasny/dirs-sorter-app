@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight, File, Folder } from "lucide-react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { useState } from "react";
 import type { IProjectFile } from "@/features/project-files/db";
 import { useTRPC } from "@/lib/trpc/client";
@@ -66,6 +67,7 @@ const FileTreeNode = ({
   projectId: string;
 }) => {
   const [open, setOpen] = useState(true);
+  const { fileId } = useParams<{ fileId: string }>();
 
   if (node.type === "file") {
     return (
@@ -74,6 +76,7 @@ const FileTreeNode = ({
         className={cn(
           "flex items-center gap-2 rounded-md px-2 py-1 hover:bg-muted/40 transition-colors font-mono text-sm",
           node.hasGroup ? `font-normal ${COLOR_WITH_GROUP}` : "font-bold",
+          fileId === node.fileId ? "bg-secondary font-bold" : "",
         )}
         style={{ marginLeft: `${depth * 16}px` }}
       >
@@ -105,9 +108,9 @@ const FileTreeNode = ({
           )}
         />
 
-        <span className={cn("text-sm",
-          node.hasGroup ? COLOR_WITH_GROUP : ""
-          )}>{node.name}</span>
+        <span className={cn("text-sm", node.hasGroup ? COLOR_WITH_GROUP : "")}>
+          {node.name}
+        </span>
       </button>
 
       {open && node.children && node.children.length > 0 ? (

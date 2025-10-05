@@ -64,4 +64,45 @@ export const projectFilesRouter = router({
         fileContent: content.toString("base64"),
       };
     }),
+
+  getNextFolderId: publicProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+        currentFileId: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const files = await db
+        .select()
+        .from(filesTable)
+        .where(eq(filesTable.projectId, input.projectId))
+        .orderBy(filesTable.filePath);
+
+      if (files.length === 0) {
+        return null;
+      }
+
+      const currentIndex = files.findIndex(
+        (file) => file.id === input.currentFileId,
+      );
+      if (currentIndex === -1) {
+        return null;
+      }
+
+      const getFolderPath = (filePath: string) => {
+        const parts = filePath.split("/");
+        return parts.slice(0, -1).join("/"); // everything except the file name
+      };
+
+      const currentFolder = getFolderPath(files[currentIndex].filePath);
+
+      // Find the next file whose folder differs from currentFolder
+      const nextFolderFile = files.slice(currentIndex + 1).find((file) => {
+        const folder = getFolderPath(file.filePath);
+        return folder && folder !== currentFolder;
+      });
+
+      return nextFolderFile ? nextFolderFile.id : null;
+    }),
 });
