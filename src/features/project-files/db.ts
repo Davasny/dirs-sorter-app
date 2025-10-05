@@ -16,6 +16,8 @@ export const filesTable = pgTable(
     filePath: text("file_path").notNull(),
 
     serverPath: text("server_path").unique().notNull(),
+
+    mimeType: text("mime_type"),
   },
   (table) => ({
     uniqueFilePathPerProject: uniqueIndex("unique_file_path_per_project").on(

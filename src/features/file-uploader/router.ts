@@ -3,10 +3,14 @@ import path from "node:path";
 import JSZip from "jszip";
 import { v7 as uuidv7 } from "uuid";
 import { z } from "zod";
-import { filesTable, type IProjectFileInsert } from "@/features/project-files/db";
+import {
+  filesTable,
+  type IProjectFileInsert,
+} from "@/features/project-files/db";
 import { db } from "@/lib/db/client";
 import { logger } from "@/lib/logger";
 import { publicProcedure, router } from "@/lib/trpc/trpc";
+import mime from "mime";
 
 export const fileUploaderRouter = router({
   upload: publicProcedure
@@ -38,39 +42,61 @@ export const fileUploaderRouter = router({
 
       const topLevelPrefix = (() => {
         const firstEntry = Object.keys(zip.files)[0];
-        const match = firstEntry.match(/^([^/]+)\//);
+        const match = firstEntry?.match(/^([^/]+)\//);
         return match ? match[1] : null;
       })();
 
       await Promise.all(
         Object.entries(zip.files).map(async ([filename, file]) => {
+          // Strip the top-level folder name if present
           const cleanName =
             topLevelPrefix && filename.startsWith(`${topLevelPrefix}/`)
               ? filename.slice(topLevelPrefix.length + 1)
               : filename;
 
-          if (!cleanName) return; // skip empty paths (top-level folder itself)
+          // Skip empty paths or explicit directory markers
+          if (!cleanName || cleanName.endsWith("/")) return;
 
+          // Build destination path and normalize for safety
           const destPath = path.join(extractDir, cleanName);
+          const safePath = path.normalize(destPath);
 
-          if (file.dir) {
-            await fs.mkdir(destPath, { recursive: true });
-          } else {
-            await fs.mkdir(path.dirname(destPath), { recursive: true });
-            const content = await file.async("nodebuffer");
-            await fs.writeFile(destPath, content);
+          // Prevent zip-slip (ensure inside extractDir)
+          if (!safePath.startsWith(extractDir + path.sep)) {
+            logger.warn({ msg: "Skipping unsafe path", cleanName });
+            return;
           }
 
+          if (file.dir) {
+            // Create directory on disk but DO NOT add to DB
+            await fs.mkdir(safePath, { recursive: true });
+            return;
+          }
+
+          // Ensure parent directory exists
+          await fs.mkdir(path.dirname(safePath), { recursive: true });
+
+          // Write the file to disk
+          const content = await file.async("nodebuffer");
+          await fs.writeFile(safePath, content);
+
+          const extension = path.extname(cleanName).slice(1); // remove leading dot
+          const mimeType = mime.getType(extension);
+
+          // Only push real files to DB
           newFiles.push({
             filePath: cleanName,
             projectId,
-            serverPath: destPath,
+            serverPath: safePath,
+            mimeType: mimeType,
           });
         }),
       );
 
-      await db.insert(filesTable).values(newFiles).onConflictDoNothing();
+      if (newFiles.length > 0) {
+        await db.insert(filesTable).values(newFiles).onConflictDoNothing();
+      }
 
-      return { id, filePath };
+      return { id, filePath, filesSaved: newFiles.length };
     }),
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import JSZip from "jszip";
 import { type ChangeEvent, useState } from "react";
 import { toast } from "sonner";
@@ -15,8 +15,14 @@ export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
   const [isZipping, setIsZipping] = useState(false);
 
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const { mutateAsync: upload } = useMutation(
-    trpc.fileUpload.upload.mutationOptions(),
+    trpc.fileUpload.upload.mutationOptions({
+      onSuccess: () =>
+        queryClient.invalidateQueries(
+          trpc.projectFiles.listFiles.queryFilter({ projectId }),
+        ),
+    }),
   );
 
   const onSelect = (e: ChangeEvent<HTMLInputElement>) => {
@@ -63,22 +69,20 @@ export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
   };
 
   return (
-    <div className="max-w-2/3 mx-auto p-8">
-      <div className="grid w-full max-w-sm items-center gap-3">
-        <Label htmlFor="files">Folder or files</Label>
-        <Input
-          id="files"
-          type="file"
-          // @ts-expect-error - directory picking (Chromium)
-          webkitdirectory="true"
-          multiple
-          onChange={onSelect}
-        />
+    <div className="grid w-full max-w-sm items-center gap-3">
+      <Label htmlFor="files">Folder or files</Label>
+      <Input
+        id="files"
+        type="file"
+        // @ts-expect-error - directory picking (Chromium)
+        webkitdirectory="true"
+        multiple
+        onChange={onSelect}
+      />
 
-        <Button onClick={zipFiles} loading={isZipping}>
-          Upload
-        </Button>
-      </div>
+      <Button onClick={zipFiles} loading={isZipping} disabled={files === null || files.length === 0}>
+        Upload
+      </Button>
     </div>
   );
 };

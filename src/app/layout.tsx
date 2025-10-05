@@ -60,7 +60,7 @@ export default function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${roboto.variable} antialiased`}>
+      <body className={`${roboto.variable} antialiased md:h-screen`}>
         <QueryClientProvider client={queryClient}>
           <TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
             <ThemeProvider
@@ -69,7 +69,7 @@ export default function RootLayout({
               forcedTheme="light"
               disableTransitionOnChange
             >
-              <main className="p-4">{children}</main>
+              <main className="p-4 h-full">{children}</main>
             </ThemeProvider>
 
             <Toaster position="bottom-right" richColors />
