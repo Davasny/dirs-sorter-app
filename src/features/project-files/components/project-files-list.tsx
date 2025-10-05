@@ -66,20 +66,16 @@ const FileTreeNode = ({
 
   if (node.type === "file") {
     return (
-      <div
+      <Link
+        href={`/project/${projectId}/file/${node.fileId}`}
         className={cn(
-          "flex items-center gap-2 rounded-md px-2 py-1 hover:bg-muted/40 transition-colors",
+          "flex items-center gap-2 rounded-md px-2 py-1 hover:bg-muted/40 transition-colors font-mono text-sm",
         )}
         style={{ marginLeft: `${depth * 16}px` }}
       >
         <File className="h-4 w-4 text-muted-foreground" />
-        <Link
-          href={`/project/${projectId}/file/${node.fileId}`}
-          className="font-mono text-sm"
-        >
-          {node.name}
-        </Link>
-      </div>
+        {node.name}
+      </Link>
     );
   }
 
@@ -101,7 +97,7 @@ const FileTreeNode = ({
         <span className="font-semibold text-sm">{node.name}</span>
       </button>
 
-      {open && node.children && node.children.length > 0 && (
+      {open && node.children && node.children.length > 0 ? (
         <div
           className="border-l border-border pl-2"
           style={{ marginLeft: `${depth * 16 + 16}px` }}
@@ -115,7 +111,7 @@ const FileTreeNode = ({
             />
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   );
 };
