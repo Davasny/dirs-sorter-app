@@ -1,6 +1,7 @@
 import { pgTable, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { v7 as uuidv7 } from "uuid";
 import { projectsTable } from "@/features/projects/db";
+import { filesGroupsTable } from "@/features/files-groups/db";
 
 export const filesTable = pgTable(
   "files",
@@ -18,6 +19,8 @@ export const filesTable = pgTable(
     serverPath: text("server_path").unique().notNull(),
 
     mimeType: text("mime_type"),
+
+    groupId: uuid("group_id").references(() => filesGroupsTable.id),
   },
   (table) => ({
     uniqueFilePathPerProject: uniqueIndex("unique_file_path_per_project").on(

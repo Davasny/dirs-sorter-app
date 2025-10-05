@@ -127,8 +127,7 @@ export const ProjectFilesList = ({ projectId }: { projectId: string }) => {
   const fileTree = buildFileTree(files);
 
   return (
-    <div className="flex flex-col gap-0.5 text-sm font-mono whitespace-break-spaces break-all">
-      {fileTree.map((node, index) => (
+    <div className="flex flex-col gap-0.5 text-sm font-mono whitespace-break-spaces break-all overflow-y-auto flex-1 min-h-0">      {fileTree.map((node, index) => (
         <FileTreeNode
           key={`${node.path}-${index}`}
           node={node}

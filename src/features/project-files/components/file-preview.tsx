@@ -18,19 +18,19 @@ export const FilePreview = ({
     trpc.projectFiles.getFileMetadata.queryOptions({ projectId, fileId }),
   );
 
+  let previewComponent = null;
+
   if (isLoadingFileMetadata) {
-    return  (
-      <div>Ładowanie...</div>
-    )
+    previewComponent = <p>Ładowanie...</p>;
+  } else if (fileMetadata?.mimeType?.includes("pdf")) {
+    previewComponent = <PdfPreview fileId={fileId} />;
+  } else if (fileMetadata?.mimeType?.includes("image")) {
+    previewComponent = (
+      <ImagePreview fileId={fileId} filePath={fileMetadata.filePath} />
+    );
+  } else {
+    previewComponent = <RawPreview fileId={fileId} />;
   }
 
-  if (fileMetadata?.mimeType?.includes("pdf")) {
-    return <PdfPreview fileId={fileId} />;
-  }
-
-  if (fileMetadata?.mimeType?.includes("image")) {
-    return <ImagePreview fileId={fileId} filePath={fileMetadata.filePath} />;
-  }
-
-  return <RawPreview fileId={fileId} />;
+  return <div className="flex flex-col gap-6 h-full">{previewComponent}</div>;
 };

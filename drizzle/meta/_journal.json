@@ -50,6 +50,27 @@
       "when": 1759663568620,
       "tag": "0006_same_kulan_gath",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1759687872229,
+      "tag": "0007_volatile_la_nuit",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1759688601250,
+      "tag": "0008_gifted_the_twelve",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1759688726206,
+      "tag": "0009_volatile_wither",
+      "breakpoints": true
     }
   ]
 }

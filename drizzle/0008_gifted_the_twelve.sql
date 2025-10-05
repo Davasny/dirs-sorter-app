@@ -1,0 +1,1 @@
+ALTER TABLE "files_groups" ALTER COLUMN "name" SET DATA TYPE text;

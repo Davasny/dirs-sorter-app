@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "unique_name_per_project" ON "files_groups" USING btree ("name","project_id");

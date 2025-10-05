@@ -13,14 +13,14 @@ export default async function Layout({
 
   return (
     <div className="flex flex-wrap gap-4 h-full">
-      <div className="flex flex-col gap-8 w-1/5 px-2 py-4">
+      <div className="flex flex-col gap-8 w-1/5 px-2 py-4 h-full overflow-hidden">
         <DirectoryUploader projectId={projectId} />
 
         <ProjectFilesList projectId={projectId} />
       </div>
 
       <div className="flex-1 h-full p-2">
-        <div className="bg-[var(--sidebar)] border-1 border-[var(--sidebar-border)] h-full rounded-xl p-4">
+        <div className="bg-[var(--sidebar)] border-1 border-[var(--sidebar-border)] h-full rounded-xl p-4 flex flex-wrap gap-4">
           {children}
         </div>
       </div>

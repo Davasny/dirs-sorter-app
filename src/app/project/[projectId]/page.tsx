@@ -11,9 +11,6 @@ export default async function Page({
   return (
     <div className="flex flex-wrap h-full">
       <div className="flex flex-col gap-8 w-1/4">
-        <DirectoryUploader projectId={projectId} />
-
-        <ProjectFilesList projectId={projectId} />
       </div>
     </div>
   );
