@@ -69,7 +69,7 @@ export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
   };
 
   return (
-    <div className="grid w-full max-w-sm items-center gap-3">
+    <div className="grid w-full items-center gap-3">
       <Label htmlFor="files">Folder or files</Label>
       <Input
         id="files"

@@ -69,7 +69,7 @@ export default function RootLayout({
               forcedTheme="light"
               disableTransitionOnChange
             >
-              <main className="p-4 h-full">{children}</main>
+              <main className="h-full">{children}</main>
             </ThemeProvider>
 
             <Toaster position="bottom-right" richColors />
