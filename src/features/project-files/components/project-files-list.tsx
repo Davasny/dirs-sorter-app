@@ -7,49 +7,88 @@ import { useState } from "react";
 import { useTRPC } from "@/lib/trpc/client";
 import { cn } from "@/lib/utils";
 
-const FileRow = ({
-  filePath,
+interface FileNode {
+  name: string;
+  type: "file" | "folder";
+  path: string;
+  fileId?: string;
+  children?: FileNode[];
+}
+
+const buildFileTree = (
+  files: Array<{ id: string; filePath: string }>,
+): FileNode[] => {
+  const root: FileNode[] = [];
+
+  files.forEach((file) => {
+    const parts = file.filePath.split("/");
+    let currentLevel = root;
+
+    parts.forEach((part, index) => {
+      const isFile = index === parts.length - 1;
+      const existingNode = currentLevel.find((node) => node.name === part);
+
+      if (existingNode) {
+        if (!isFile && existingNode.children) {
+          currentLevel = existingNode.children;
+        }
+      } else {
+        const newNode: FileNode = {
+          name: part,
+          type: isFile ? "file" : "folder",
+          path: parts.slice(0, index + 1).join("/"),
+          ...(isFile && { fileId: file.id }),
+          ...(!isFile && { children: [] }),
+        };
+
+        currentLevel.push(newNode);
+
+        if (!isFile && newNode.children) {
+          currentLevel = newNode.children;
+        }
+      }
+    });
+  });
+
+  return root;
+};
+
+const FileTreeNode = ({
+  node,
   depth,
-  fileId,
   projectId,
 }: {
-  filePath: string;
+  node: FileNode;
   depth: number;
-  fileId: string;
   projectId: string;
 }) => {
-  const parts = filePath.split("/");
-  const isFolder = parts.length > 1;
   const [open, setOpen] = useState(true);
 
-  if (!isFolder) {
-    // simple file
+  if (node.type === "file") {
     return (
       <div
         className={cn(
           "flex items-center gap-2 rounded-md px-2 py-1 hover:bg-muted/40 transition-colors",
-          depth > 0 && `ml-${depth * 4}`,
         )}
+        style={{ marginLeft: `${depth * 16}px` }}
       >
         <File className="h-4 w-4 text-muted-foreground" />
         <Link
-          href={`/project/${projectId}/file/${fileId}`}
+          href={`/project/${projectId}/file/${node.fileId}`}
           className="font-mono text-sm"
         >
-          {filePath}
+          {node.name}
         </Link>
       </div>
     );
   }
 
-  const folderName = parts[0];
-  const remainingPath = parts.slice(1).join("/");
-
   return (
-    <div className={cn(depth > 0 && `ml-${depth * 4}`)}>
+    <div>
       <button
         type="button"
         className="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-muted/40 cursor-pointer select-none transition-colors w-full"
+        style={{ marginLeft: `${depth * 16}px` }}
         onClick={() => setOpen(!open)}
       >
         {open ? (
@@ -59,19 +98,24 @@ const FileRow = ({
         )}
 
         <Folder className="h-4 w-4 text-[var(--color-ring)]" />
-        <span className="font-semibold text-sm">{folderName}</span>
+        <span className="font-semibold text-sm">{node.name}</span>
       </button>
 
-      {open && remainingPath ? (
-        <div className="border-l border-border ml-4 pl-2">
-          <FileRow
-            filePath={remainingPath}
-            depth={depth + 1}
-            fileId={fileId}
-            projectId={projectId}
-          />
+      {open && node.children && node.children.length > 0 && (
+        <div
+          className="border-l border-border pl-2"
+          style={{ marginLeft: `${depth * 16 + 16}px` }}
+        >
+          {node.children.map((child, index) => (
+            <FileTreeNode
+              key={`${child.path}-${index}`}
+              node={child}
+              depth={0}
+              projectId={projectId}
+            />
+          ))}
         </div>
-      ) : null}
+      )}
     </div>
   );
 };
@@ -82,13 +126,16 @@ export const ProjectFilesList = ({ projectId }: { projectId: string }) => {
     trpc.projectFiles.listFiles.queryOptions({ projectId }),
   );
 
+  if (!files) return null;
+
+  const fileTree = buildFileTree(files);
+
   return (
     <div className="flex flex-col gap-0.5 text-sm font-mono whitespace-break-spaces break-all">
-      {files?.map((f) => (
-        <FileRow
-          key={f.id}
-          filePath={f.filePath}
-          fileId={f.id}
+      {fileTree.map((node, index) => (
+        <FileTreeNode
+          key={`${node.path}-${index}`}
+          node={node}
           depth={0}
           projectId={projectId}
         />
