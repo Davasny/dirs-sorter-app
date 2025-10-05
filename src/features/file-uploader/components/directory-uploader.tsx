@@ -2,17 +2,18 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import JSZip from "jszip";
-import { type ChangeEvent, useState } from "react";
+import { type ChangeEvent, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { blobToBase64 } from "@/features/file-uploader/utils/blob-to-base64";
 import { useTRPC } from "@/lib/trpc/client";
 
 export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
   const [files, setFiles] = useState<FileList | null>(null);
-  const [isZipping, setIsZipping] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -35,7 +36,7 @@ export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
       return;
     }
 
-    setIsZipping(true);
+    setIsUploading(true);
     try {
       const zip = new JSZip();
 
@@ -51,27 +52,33 @@ export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
         compressionOptions: { level: 6 },
       });
 
+      toast.info("Pliki spakowane do zipa");
+
       const base64Zip = await blobToBase64(zipBlob);
       await upload({
         zipContent: base64Zip,
         projectId,
       });
 
-      toast.success("Uploaded!");
+      toast.success("Pliki wysłane!");
       setFiles(null);
+
+      if (inputRef.current) {
+        inputRef.current.value = "";
+      }
     } catch (error) {
       toast.error("Upload failed", {
         description: (error as Error).message,
       });
     } finally {
-      setIsZipping(false);
+      setIsUploading(false);
     }
   };
 
   return (
     <div className="grid w-full items-center gap-3">
-      <Label htmlFor="files">Folder or files</Label>
       <Input
+        ref={inputRef}
         id="files"
         type="file"
         // @ts-expect-error - directory picking (Chromium)
@@ -80,8 +87,12 @@ export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
         onChange={onSelect}
       />
 
-      <Button onClick={zipFiles} loading={isZipping} disabled={files === null || files.length === 0}>
-        Upload
+      <Button
+        onClick={zipFiles}
+        loading={isUploading}
+        disabled={files === null || files.length === 0 || isUploading}
+      >
+        Wyślij
       </Button>
     </div>
   );
