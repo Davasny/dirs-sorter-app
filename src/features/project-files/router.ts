@@ -12,7 +12,8 @@ export const projectFilesRouter = router({
       return db
         .select()
         .from(filesTable)
-        .where(eq(filesTable.projectId, ctx.input.projectId));
+        .where(eq(filesTable.projectId, ctx.input.projectId))
+        .orderBy(filesTable.filePath);
     }),
 
   getFileMetadata: publicProcedure

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -16,18 +16,33 @@ const GroupSelect = ({
   fileMetadata: IProjectFile;
 }) => {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
   const { data: groups } = useQuery(
     trpc.filesGroups.listGroups.queryOptions({ projectId }),
   );
 
-  const { mutateAsync: assignFile } = useMutation(
-    trpc.filesGroups.assignFileToGroup.mutationOptions(),
+  const { mutateAsync: assignFiles } = useMutation(
+    trpc.filesGroups.assignAllFolderFilesToGroup.mutationOptions({
+      onSuccess: () => {
+        void queryClient.invalidateQueries(
+          trpc.projectFiles.listFiles.queryOptions({ projectId }),
+        );
+
+        void queryClient.invalidateQueries(
+          trpc.projectFiles.getFileMetadata.queryOptions({
+            projectId,
+            fileId: fileMetadata.id,
+          }),
+        );
+      },
+    }),
   );
 
   const onGroupChange = async (groupId: string) => {
     try {
-      await assignFile({ fileId: fileMetadata.id, groupId });
-      toast.success("Plik został przypisany do grupy");
+      await assignFiles({ fileId: fileMetadata.id, groupId, projectId });
+      toast.success("Pliki zostały przypisany do grupy");
     } catch (error) {
       toast.error("Nie udało się przypisać pliku do grupy", {
         description: (error as Error).message,
@@ -80,7 +95,10 @@ export const GroupSelectWrapper = ({
 }) => {
   const trpc = useTRPC();
   const { data: fileMetadata, isLoading: isLoadingFileMetadata } = useQuery(
-    trpc.projectFiles.getFileMetadata.queryOptions({ projectId, fileId }),
+    {
+      ...trpc.projectFiles.getFileMetadata.queryOptions({ projectId, fileId }),
+      refetchOnMount: true,
+    }
   );
 
   if (isLoadingFileMetadata) return <p>Ładowanie...</p>;

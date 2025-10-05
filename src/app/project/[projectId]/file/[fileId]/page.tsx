@@ -1,4 +1,4 @@
-import { GroupSelectWrapper, } from "@/features/files-groups/components/group-select";
+import { GroupSelectWrapper } from "@/features/files-groups/components/group-select";
 import { FileMetadata } from "@/features/project-files/components/file-metadata";
 import { FilePreview } from "@/features/project-files/components/file-preview";
 
@@ -21,7 +21,11 @@ export default async function Page({
       {/* right sidebar */}
       <div className="flex flex-col gap-8">
         <FileMetadata projectId={projectId} fileId={fileId} />
-        <GroupSelectWrapper projectId={projectId} fileId={fileId} />
+        <GroupSelectWrapper
+          projectId={projectId}
+          fileId={fileId}
+          key={fileId}
+        />
       </div>
     </div>
   );

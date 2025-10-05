@@ -1,4 +1,6 @@
-import { eq } from "drizzle-orm";
+import path from "node:path";
+import { TRPCError } from "@trpc/server";
+import { and, eq, ilike } from "drizzle-orm";
 import { z } from "zod";
 import { filesGroupsTable } from "@/features/files-groups/db";
 import { filesTable } from "@/features/project-files/db";
@@ -27,7 +29,7 @@ export const filesGroupsRouter = router({
       }),
     )
     .mutation(async (ctx) => {
-      const newGroup = await db
+      const [newGroup] = await db
         .insert(filesGroupsTable)
         .values({
           name: ctx.input.name,
@@ -35,20 +37,37 @@ export const filesGroupsRouter = router({
         })
         .returning();
 
-      return newGroup[0];
+      return newGroup;
     }),
 
-  assignFileToGroup: publicProcedure
+  assignAllFolderFilesToGroup: publicProcedure
     .input(
       z.object({
         fileId: z.string(),
+        projectId: z.string(),
         groupId: z.string().nullable(),
       }),
     )
     .mutation(async (ctx) => {
+      const [file] = await db
+        .select()
+        .from(filesTable)
+        .where(eq(filesTable.id, ctx.input.fileId));
+
+      if (!file) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      const folder = path.dirname(file.filePath);
+
       await db
         .update(filesTable)
         .set({ groupId: ctx.input.groupId })
-        .where(eq(filesTable.id, ctx.input.fileId));
+        .where(
+          and(
+            ilike(filesTable.filePath, `${folder}/%`),
+            eq(filesTable.projectId, ctx.input.projectId),
+          ),
+        );
     }),
 });
