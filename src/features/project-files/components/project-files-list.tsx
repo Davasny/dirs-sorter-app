@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight, File, Folder } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { IProjectFile } from "@/features/project-files/db";
 import { useTRPC } from "@/lib/trpc/client";
 import { cn } from "@/lib/utils";
@@ -118,9 +118,9 @@ const FileTreeNode = ({
           className="border-l border-border pl-2"
           style={{ marginLeft: `${depth * 16 + 16}px` }}
         >
-          {node.children.map((child, index) => (
+          {node.children.map((child) => (
             <FileTreeNode
-              key={`${child.path}-${index}`}
+              key={child.path}
               node={child}
               depth={0}
               projectId={projectId}
@@ -138,15 +138,19 @@ export const ProjectFilesList = ({ projectId }: { projectId: string }) => {
     trpc.projectFiles.listFiles.queryOptions({ projectId }),
   );
 
-  if (!files) return null;
+  const fileTree = useMemo(() => {
+    if (!files) return [];
 
-  const fileTree = buildFileTree(files);
+    return buildFileTree(files);
+  }, [files]);
+
+  if (!files) return null;
 
   return (
     <div className="flex flex-col gap-0.5 text-sm font-mono whitespace-break-spaces break-all overflow-y-auto flex-1 min-h-0">
       {fileTree.map((node) => (
         <FileTreeNode
-          key={`${node.path}-${node.name}`}
+          key={node.path}
           node={node}
           depth={0}
           projectId={projectId}
