@@ -2,14 +2,15 @@ import { createHash } from "node:crypto";
 import { trpcServer } from "@hono/trpc-server";
 import { zValidator } from "@hono/zod-validator";
 import contentDisposition from "content-disposition";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import fs from "fs/promises";
 import { Hono } from "hono";
 import { handle } from "hono/vercel";
 import JSZip from "jszip";
 import path from "path";
 import { z } from "zod";
-import { auth } from "@/features/auth/lib/auth";
+import { auth, IUser } from "@/features/auth/lib/auth";
+import { checkUserProjectAccess } from "@/features/auth/utils/check-user-project-access";
 import { filesGroupsTable } from "@/features/files-groups/db";
 import { filesTable } from "@/features/project-files/db";
 import { projectsTable } from "@/features/projects/db";
@@ -21,7 +22,11 @@ import { createContext } from "@/lib/trpc/trpc";
 
 export const runtime = "nodejs";
 
-const app = new Hono();
+const app = new Hono<{
+  Variables: {
+    user: IUser;
+  };
+}>();
 
 app.use(
   "/api/trpc/*",
@@ -36,56 +41,116 @@ app.on(["POST", "GET"], "/api/auth/*", (c) => {
   return auth.handler(c.req.raw);
 });
 
+app.use("/api/authorized/*", async (c, next) => {
+  const session = await auth.api.getSession({headers: c.req.raw.headers});
 
-app.get("/api/files/:fileId", async (c) => {
-  const { fileId } = c.req.param();
-
-  // Fetch file path from DB
-  const [file] = await db
-    .select()
-    .from(filesTable)
-    .where(eq(filesTable.id, fileId))
-    .limit(1);
-
-  if (!file) {
-    return c.json({ msg: "File not found" }, 404);
+  if (!session) {
+    return c.json(
+      {
+        error: "Unauthorized",
+        message: "You are not authorized to access this resource",
+      },
+      401,
+    );
   }
 
-  try {
-    const fileBuffer = await fs.readFile(file.serverPath);
-    const mimeType = file.mimeType || "application/octet-stream";
-    const fileName = path.basename(file.serverPath);
-
-    // Compute an ETag (hash of file)
-    const etag = createHash("sha1").update(fileBuffer).digest("hex");
-
-    const maxAge = 60 * 60; // 1 hour in seconds
-
-    // Handle client cache validation
-    const ifNoneMatch = c.req.header("if-none-match");
-    if (ifNoneMatch === etag) {
-      return c.body(null, 304, {
-        ETag: etag,
-        "Cache-Control": `public, max-age=${maxAge}, immutable`,
-      });
-    }
-
-    // Send file with caching headers
-    return c.body(Buffer.from(fileBuffer), 200, {
-      "Content-Type": mimeType,
-      "Content-Disposition": `inline; filename="${fileName}"`,
-      "Cache-Control": `public, max-age=${maxAge}, immutable`,
-      ETag: etag,
-      "Last-Modified": uuidToTimestamp(file.id).toUTCString(),
-    });
-  } catch (err) {
-    console.error("Error reading file:", err);
-    return c.json({ msg: "Error reading file" }, 500);
-  }
+  c.set("user", session.user as IUser);
+  return next();
 });
 
+app.use(
+  "/api/authorized/project/:projectId/",
+  zValidator(
+    "param",
+    z.object({
+      projectId: z.uuidv7(),
+      fileId: z.uuidv7(),
+    }),
+  ),
+  async (c, next) => {
+    const {projectId} = c.req.param()
+    const user = c.get("user");
+
+    const hasAccess = await checkUserProjectAccess({
+      userId: user.id,
+      projectId,
+    })
+
+    if (!hasAccess) {
+      return c.json(
+        {
+          msg: "You are not authorized to access this project",
+        },
+        401,
+      );
+    }
+
+    return next();
+  },
+);
+
 app.get(
-  "/api/grouped-files/:projectId",
+  "/api/authorized/project/:projectId/files/:fileId",
+  zValidator(
+    "param",
+    z.object({
+      projectId: z.uuidv7(),
+      fileId: z.uuidv7(),
+    }),
+  ),
+  async (c) => {
+    const {projectId, fileId} = c.req.valid("param");
+
+    // Fetch file path from DB
+    const [file] = await db
+      .select()
+      .from(filesTable)
+      .where(and(
+        eq(filesTable.id, fileId),
+        eq(filesTable.projectId, projectId)
+      ))
+      .limit(1);
+
+    if (!file) {
+      return c.json({msg: "File not found"}, 404);
+    }
+
+    try {
+      const fileBuffer = await fs.readFile(file.serverPath);
+      const mimeType = file.mimeType || "application/octet-stream";
+      const fileName = path.basename(file.serverPath);
+
+      // Compute an ETag (hash of file)
+      const etag = createHash("sha1").update(fileBuffer).digest("hex");
+
+      const maxAge = 60 * 60; // 1 hour in seconds
+
+      // Handle client cache validation
+      const ifNoneMatch = c.req.header("if-none-match");
+      if (ifNoneMatch === etag) {
+        return c.body(null, 304, {
+          ETag: etag,
+          "Cache-Control": `public, max-age=${maxAge}, immutable`,
+        });
+      }
+
+      // Send file with caching headers
+      return c.body(Buffer.from(fileBuffer), 200, {
+        "Content-Type": mimeType,
+        "Content-Disposition": `inline; filename="${fileName}"`,
+        "Cache-Control": `public, max-age=${maxAge}, immutable`,
+        ETag: etag,
+        "Last-Modified": uuidToTimestamp(file.id).toUTCString(),
+      });
+    } catch (err) {
+      console.error("Error reading file:", err);
+      return c.json({msg: "Error reading file"}, 500);
+    }
+  },
+);
+
+app.get(
+  "/api/authorized/project/:projectId/grouped-files",
   zValidator("param", z.object({ projectId: z.uuidv7() })),
   async (c) => {
     const { projectId } = c.req.valid("param");
@@ -111,7 +176,10 @@ app.get(
       const files = await db
         .select()
         .from(filesTable)
-        .where(eq(filesTable.projectId, projectId));
+        .where(and(
+          eq(filesTable.projectId, projectId),
+          isNull(filesTable.deletedAt)
+        ));
 
       if (files.length === 0) {
         logger.warn({ msg: "No files found for project", projectId });
@@ -216,7 +284,7 @@ app.get(
         "Content-Type": "application/zip",
         "Content-Disposition": contentDisposition(zipName, {
           type: "attachment",
-          fallback: false
+          fallback: false,
         }),
         "Content-Length": zipBuffer.length.toString(),
       };

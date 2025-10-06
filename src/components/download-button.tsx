@@ -29,10 +29,13 @@ export function DownloadGroupButton({ projectId }: Props) {
     setProgress(null);
 
     try {
-      const res = await fetch(`/api/grouped-files/${projectId}`, {
-        method: "GET",
-        signal: controller.signal,
-      });
+      const res = await fetch(
+        `/api/authorized/project/${projectId}/grouped-files`,
+        {
+          method: "GET",
+          signal: controller.signal,
+        },
+      );
 
       if (!res.ok) {
         throw new Error(`Server responded ${res.status}`);

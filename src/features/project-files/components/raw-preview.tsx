@@ -1,10 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 
-export const RawPreview = ({ fileId }: { fileId: string }) => {
+export const RawPreview = ({
+                             fileId,
+                             projectId,
+                           }: {
+  fileId: string;
+  projectId: string;
+}) => {
   const { data: fileContent } = useQuery({
     queryKey: ["fileContent", fileId],
     queryFn: async () => {
-      const response = await fetch(`/api/files/${fileId}`);
+      const response = await fetch(
+        `/api/authorized/project/${projectId}/files/${fileId}`,
+      );
+
       if (!response.ok) throw new Error("Failed to fetch file");
       return await response.text();
     },

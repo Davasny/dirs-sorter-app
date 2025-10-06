@@ -23,13 +23,17 @@ export const FilePreview = ({
   if (isLoadingFileMetadata) {
     previewComponent = <p>Ładowanie...</p>;
   } else if (fileMetadata?.mimeType?.includes("pdf")) {
-    previewComponent = <PdfPreview fileId={fileId} />;
+    previewComponent = <PdfPreview projectId={projectId} fileId={fileId}/>;
   } else if (fileMetadata?.mimeType?.includes("image")) {
     previewComponent = (
-      <ImagePreview fileId={fileId} filePath={fileMetadata.filePath} />
+      <ImagePreview
+        projectId={projectId}
+        fileId={fileId}
+        filePath={fileMetadata.filePath}
+      />
     );
   } else if (fileMetadata?.mimeType !== null) {
-    previewComponent = <RawPreview fileId={fileId} />;
+    previewComponent = <RawPreview projectId={projectId} fileId={fileId}/>;
   } else previewComponent = <p>Nie można podglądnąć tego pliku.</p>;
 
   return <div className="flex flex-col gap-6 h-full">{previewComponent}</div>;
