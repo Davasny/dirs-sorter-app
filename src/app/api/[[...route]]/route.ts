@@ -71,8 +71,6 @@ app.get("/api/files/:fileId", async (c) => {
   }
 });
 
-export default app;
-
 export const GET = handle(app);
 export const HEAD = handle(app);
 export const POST = handle(app);
