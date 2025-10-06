@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useTRPC } from "@/lib/trpc/client";
@@ -13,6 +13,8 @@ export const FileMetadata = ({
   fileId: string;
   projectId: string;
 }) => {
+  const { push } = useRouter();
+
   const trpc = useTRPC();
   const { data: fileMetadata } = useQuery(
     trpc.projectFiles.getFileMetadata.queryOptions({ projectId, fileId }),
@@ -34,15 +36,12 @@ export const FileMetadata = ({
         <Label>Folder</Label>
         <span className="font-mono text-sm">{directoryName?.trim()}</span>
 
-        <Button asChild>
-          <Link
-            href={`/project/${projectId}/file/${nextDir}`}
-            // className="text-sm text-blue-600 hover:underline"
-          >
-            Następny folder
-          </Link>
+        <Button
+          disabled={nextDir === null}
+          onClick={() => push(`/project/${projectId}/file/${nextDir}`)}
+        >
+          {nextDir === null ? <>Brak następnego folderu</> : <>Następny folder</>}
         </Button>
-
       </div>
 
       <div className="flex flex-col gap-2">
