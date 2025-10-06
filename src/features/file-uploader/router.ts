@@ -13,7 +13,8 @@ import { db } from "@/lib/db/client";
 import { logger } from "@/lib/logger";
 import { publicProcedure, router } from "@/lib/trpc/trpc";
 
-export const uploadsDir = config.UPLOADS_DIR_PATH || path.join(process.cwd(), "uploads");
+export const uploadsDir =
+  config.UPLOADS_DIR_PATH || path.join(process.cwd(), "uploads");
 
 export const fileUploaderRouter = router({
   upload: publicProcedure
@@ -26,10 +27,16 @@ export const fileUploaderRouter = router({
     .mutation(async ({ input }) => {
       const { zipContent, projectId } = input;
 
+      logger.info({ msg: "Starting file upload" });
+
       const id = uuidv7();
       const filePath = path.join(uploadsDir, `${id}.zip`);
 
+      logger.info({ msg: "Ensuring uploads directory exists", uploadsDir });
+
       await fs.mkdir(uploadsDir, { recursive: true });
+
+      logger.info({ msg: "Writing ZIP file to disk", filePath });
 
       const zipBuffer = Buffer.from(zipContent, "base64");
       await fs.writeFile(filePath, zipBuffer);
