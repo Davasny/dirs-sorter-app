@@ -1,4 +1,4 @@
-import { and, eq, isNotNull } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { filesTable } from "@/features/project-files/db";
 import { db } from "@/lib/db/client";
@@ -12,7 +12,7 @@ export const projectFilesRouter = router({
       .where(
         and(
           eq(filesTable.projectId, ctx.input.projectId),
-          isNotNull(filesTable.deletedAt),
+          isNull(filesTable.deletedAt),
         ),
       )
       .orderBy(filesTable.filePath);
@@ -32,7 +32,7 @@ export const projectFilesRouter = router({
           and(
             eq(filesTable.id, ctx.input.fileId),
             eq(filesTable.projectId, ctx.input.projectId),
-            isNotNull(filesTable.deletedAt),
+            isNull(filesTable.deletedAt),
           ),
         );
 
