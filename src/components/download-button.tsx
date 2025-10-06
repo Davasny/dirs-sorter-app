@@ -31,11 +31,26 @@ export function DownloadGroupButton({ projectId }: Props) {
         throw new Error(`Server responded ${res.status}`);
       }
 
-      const contentDisposition = res.headers.get("Content-Disposition");
+      const condentDispositionHeader =
+        res.headers.get("Content-Disposition") || "";
       let filename = `group-${projectId}.zip`;
-      const match = contentDisposition?.match(/filename="?([^"]+)"?/);
-      if (match?.[1]) {
-        filename = decodeURIComponent(match[1]);
+
+      // Try the UTF-8 encoded form first: filename*=UTF-8''encoded-name.zip
+      const utf8Match = condentDispositionHeader.match(
+        /filename\*\s*=\s*UTF-8''([^;]+)/i,
+      );
+      if (utf8Match?.[1]) {
+        filename = decodeURIComponent(utf8Match[1]);
+      } else {
+        // Fallback to the plain filename="name.zip"
+        const plainMatch = condentDispositionHeader.match(
+          /filename\s*=\s*"([^"]+)"|filename\s*=\s*([^;]+)/i,
+        );
+
+        if (plainMatch) {
+          // DO NOT decodeURIComponent here — plain filenames are already literal text
+          filename = (plainMatch[1] || plainMatch[2] || "").trim();
+        }
       }
 
       const total = Number(res.headers.get("Content-Length") || 0);

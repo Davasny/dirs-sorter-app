@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { trpcServer } from "@hono/trpc-server";
 import { zValidator } from "@hono/zod-validator";
+import contentDisposition from "content-disposition";
 import { eq } from "drizzle-orm";
 import fs from "fs/promises";
 import { Hono } from "hono";
@@ -204,12 +205,19 @@ app.get(
         zipSize: zipBuffer.length,
       });
 
-      // Return as octet-stream with appropriate headers
-      return c.body(Buffer.from(zipBuffer), 200, {
-        "Content-Type": "application/octet-stream",
-        "Content-Disposition": `attachment; filename="pliki-${project.name}.zip"`,
+      const zipName = `pliki-${project.name}.zip`; // contains Polish chars
+      const headers = {
+        "Content-Type": "application/zip",
+        "Content-Disposition": contentDisposition(zipName, {
+          type: "attachment",
+          fallback: false
+        }),
         "Content-Length": zipBuffer.length.toString(),
-      });
+      };
+
+      logger.info({msg: "Sending ZIP file", projectId, zipName, headers});
+
+      return c.body(Buffer.from(zipBuffer), 200, headers);
     } catch (error) {
       logger.error({
         msg: "Error generating grouped files zip",
