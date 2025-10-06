@@ -2,12 +2,20 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/features/auth/lib/auth-client";
 import { passwordSchema } from "@/features/auth/schemas/password-schema";
@@ -27,6 +35,7 @@ type ISignUpForm = z.infer<typeof signupSchema>;
 
 export const SignUpForm = () => {
   const [inProgress, setInProgress] = useState(false);
+  const {push} = useRouter();
 
   const form = useForm<ISignUpForm>({
     defaultValues: {
@@ -52,6 +61,9 @@ export const SignUpForm = () => {
       toast.error("Failed to create account", {
         description: error.message,
       });
+    } else {
+      form.reset();
+      push("/signup/thanks");
     }
   };
 
@@ -114,7 +126,9 @@ export const SignUpForm = () => {
           </Link>
 
           <div className="flex flex-wrap justify-end gap-2">
-            <Button type="submit" loading={inProgress}>Zarejestruj</Button>
+            <Button type="submit" loading={inProgress}>
+              Zarejestruj
+            </Button>
           </div>
         </div>
       </form>
