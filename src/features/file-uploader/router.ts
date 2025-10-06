@@ -8,17 +8,16 @@ import { filesTable, type IProjectFileInsert, } from "@/features/project-files/d
 import { config } from "@/lib/config/config";
 import { db } from "@/lib/db/client";
 import { logger } from "@/lib/logger";
-import { publicProcedure, router } from "@/lib/trpc/trpc";
+import { projectProcedure, router } from "@/lib/trpc/trpc";
 
 export const uploadsDir =
   config.UPLOADS_DIR_PATH || path.join(process.cwd(), "uploads");
 
 export const fileUploaderRouter = router({
-  upload: publicProcedure
+  upload: projectProcedure
     .input(
       z.object({
         zipContent: z.string(), // base64-encoded ZIP content
-        projectId: z.string(),
       }),
     )
     .mutation(async ({ input }) => {

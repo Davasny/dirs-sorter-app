@@ -3,11 +3,10 @@ import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { filesTable } from "@/features/project-files/db";
 import { db } from "@/lib/db/client";
-import { publicProcedure, router } from "@/lib/trpc/trpc";
+import { projectProcedure, router } from "@/lib/trpc/trpc";
 
 export const projectFilesRouter = router({
-  listFiles: publicProcedure
-    .input(z.object({ projectId: z.uuidv7() }))
+  listFiles: projectProcedure
     .query(async (ctx) => {
       return db
         .select()
@@ -16,11 +15,10 @@ export const projectFilesRouter = router({
         .orderBy(filesTable.filePath);
     }),
 
-  getFileMetadata: publicProcedure
+  getFileMetadata: projectProcedure
     .input(
       z.object({
         fileId: z.string(),
-        projectId: z.string(),
       }),
     )
     .query(async (ctx) => {
@@ -39,11 +37,10 @@ export const projectFilesRouter = router({
       return file;
     }),
 
-  getFileContent: publicProcedure
+  getFileContent: projectProcedure
     .input(
       z.object({
         fileId: z.string(),
-        projectId: z.string(),
       }),
     )
     .query(async (ctx) => {
@@ -65,10 +62,9 @@ export const projectFilesRouter = router({
       };
     }),
 
-  getNextFolderId: publicProcedure
+  getNextFolderId: projectProcedure
     .input(
       z.object({
-        projectId: z.string(),
         currentFileId: z.string(),
       }),
     )

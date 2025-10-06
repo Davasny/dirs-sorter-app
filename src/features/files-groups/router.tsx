@@ -7,15 +7,10 @@ import { groupSchema } from "@/features/files-groups/schemas";
 import { filesTable } from "@/features/project-files/db";
 import { db } from "@/lib/db/client";
 import { logger } from "@/lib/logger";
-import { publicProcedure, router } from "@/lib/trpc/trpc";
+import { projectProcedure, router } from "@/lib/trpc/trpc";
 
 export const filesGroupsRouter = router({
-  listGroups: publicProcedure
-    .input(
-      z.object({
-        projectId: z.string(),
-      }),
-    )
+  listGroups: projectProcedure
     .query(async (ctx) => {
       return db
         .select()
@@ -23,11 +18,10 @@ export const filesGroupsRouter = router({
         .where(eq(filesGroupsTable.projectId, ctx.input.projectId));
     }),
 
-  createGroup: publicProcedure
+  createGroup: projectProcedure
     .input(
       z.object({
         name: z.string().nonempty(),
-        projectId: z.string(),
       }),
     )
     .mutation(async (ctx) => {
@@ -42,10 +36,9 @@ export const filesGroupsRouter = router({
       return newGroup;
     }),
 
-  updateGroups: publicProcedure
+  updateGroups: projectProcedure
     .input(
       z.object({
-        projectId: z.string(),
         groups: z.array(groupSchema).min(1),
       }),
     )
@@ -127,11 +120,10 @@ export const filesGroupsRouter = router({
       });
     }),
 
-  assignAllFolderFilesToGroup: publicProcedure
+  assignAllFolderFilesToGroup: projectProcedure
     .input(
       z.object({
         fileId: z.string(),
-        projectId: z.string(),
         groupId: z.string().nullable(),
       }),
     )
@@ -158,11 +150,10 @@ export const filesGroupsRouter = router({
         );
     }),
 
-  listFilesInGroup: publicProcedure
+  listFilesInGroup: projectProcedure
     .input(
       z.object({
         groupId: z.string(),
-        projectId: z.string(),
       }),
     )
     .query(async (ctx) => {
