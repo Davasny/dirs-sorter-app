@@ -10,13 +10,12 @@ import { logger } from "@/lib/logger";
 import { projectProcedure, router } from "@/lib/trpc/trpc";
 
 export const filesGroupsRouter = router({
-  listGroups: projectProcedure
-    .query(async (ctx) => {
-      return db
-        .select()
-        .from(filesGroupsTable)
-        .where(eq(filesGroupsTable.projectId, ctx.input.projectId));
-    }),
+  listGroups: projectProcedure.query(async (ctx) => {
+    return db
+      .select()
+      .from(filesGroupsTable)
+      .where(eq(filesGroupsTable.projectId, ctx.input.projectId));
+  }),
 
   createGroup: projectProcedure
     .input(
@@ -137,16 +136,26 @@ export const filesGroupsRouter = router({
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
-      const folder = path.dirname(file.filePath);
+      // Use posix to ensure forward slashes
+      const folder = path.posix.dirname(file.filePath || "");
+      const isRoot = folder === "." || folder === "";
+
+      // Build the folder predicate:
+      // - If root: filePath has no '/' at all (root-level files only)
+      // - Else: filePath starts with `${folder}/` (all files in that folder and below)
+      const folderPredicate = isRoot
+        ? sql`POSITION('/' IN
+              ${filesTable.filePath}
+              )
+              =
+              0`
+        : ilike(filesTable.filePath, `${folder}/%`);
 
       await db
         .update(filesTable)
         .set({ groupId: ctx.input.groupId })
         .where(
-          and(
-            ilike(filesTable.filePath, `${folder}/%`),
-            eq(filesTable.projectId, ctx.input.projectId),
-          ),
+          and(folderPredicate, eq(filesTable.projectId, ctx.input.projectId)),
         );
     }),
 
