@@ -11,7 +11,10 @@ import { useTRPC } from "@/lib/trpc/client";
 
 export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
   const [files, setFiles] = useState<FileList | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
+
+  const [status, setStatus] = useState<
+    "zipping" | "uploading" | "failed" | "done" | null
+  >(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -30,13 +33,14 @@ export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
     setFiles(e.target.files);
   };
 
-  const zipFiles = async () => {
+  const uploadFiles = async () => {
     if (!files || files.length === 0) {
       toast.error("Please select files first");
       return;
     }
 
-    setIsUploading(true);
+    setStatus("zipping");
+
     try {
       const zip = new JSZip();
 
@@ -54,6 +58,7 @@ export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
 
       toast.info("Pliki spakowane do zipa");
 
+      setStatus("uploading");
       const base64Zip = await blobToBase64(zipBlob);
       await upload({
         zipContent: base64Zip,
@@ -66,14 +71,17 @@ export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
       if (inputRef.current) {
         inputRef.current.value = "";
       }
+
+      setStatus("done");
     } catch (error) {
       toast.error("Upload failed", {
         description: (error as Error).message,
       });
-    } finally {
-      setIsUploading(false);
+      setStatus("failed");
     }
   };
+
+  const inProgress = status === "uploading" || status === "zipping";
 
   return (
     <div className="grid w-full items-center gap-3">
@@ -87,10 +95,14 @@ export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
         onChange={onSelect}
       />
 
+      <div className="text-sm">
+        <span>Status: {status}</span>
+      </div>
+
       <Button
-        onClick={zipFiles}
-        loading={isUploading}
-        disabled={files === null || files.length === 0 || isUploading}
+        onClick={uploadFiles}
+        loading={inProgress}
+        disabled={files === null || files.length === 0 || inProgress}
       >
         Wyślij
       </Button>
