@@ -9,13 +9,29 @@ import { Input } from "@/components/ui/input";
 import { blobToBase64 } from "@/features/file-uploader/utils/blob-to-base64";
 import { useTRPC } from "@/lib/trpc/client";
 
+type IFileUploadStatus =
+  | "idle"
+  | "zipping"
+  | "savingB64"
+  | "uploading"
+  | "failed"
+  | "done";
+
+const i18nStatusMap: Record<Exclude<IFileUploadStatus, null>, string> = {
+  idle: "wybierz folder",
+  zipping: "zipowanie",
+  savingB64: "konwersja do base64",
+  uploading: "wysyłanie",
+  failed: "error",
+  done: "gotowe",
+};
+
 export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
   const [files, setFiles] = useState<FileList | null>(null);
   const [zipSizeMB, setZipSizeMB] = useState<number | null>(null);
 
-  const [status, setStatus] = useState<
-    "zipping" | "savingB64" | "uploading" | "failed" | "done" | null
-  >(null);
+  const [status, setStatus] = useState<IFileUploadStatus>("idle");
+  const [error, setError] = useState<string | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -42,6 +58,7 @@ export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
     }
 
     setStatus("zipping");
+    setError(null);
 
     try {
       const zip = new JSZip();
@@ -81,10 +98,18 @@ export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
 
       setStatus("done");
     } catch (error) {
+      let errorMessage = "Unknown error";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      console.error("Upload failed", error);
       toast.error("Upload failed", {
-        description: (error as Error).message,
+        description: errorMessage,
       });
+
       setStatus("failed");
+      setError(errorMessage);
     }
   };
 
@@ -104,12 +129,14 @@ export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
       />
 
       <div className="text-sm space-y-1">
-        <div>
-          <span>Status: {status ?? "idle"}</span>
+        <div className="flex flex-col gap-2">
+          <span>Status: {i18nStatusMap[status]}</span>
+          {error ? <span>{error}</span> : null}
         </div>
+
         {zipSizeMB !== null && (
           <div>
-            <span>ZIP size: {zipSizeMB.toFixed(2)} MB</span>
+            <span>Rozmiar zipa: {zipSizeMB.toFixed(2)} MB</span>
           </div>
         )}
       </div>
