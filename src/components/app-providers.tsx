@@ -1,15 +1,9 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-  createTRPCClient,
-  httpBatchLink,
-  httpLink,
-  isNonJsonSerializable,
-  loggerLink,
-  splitLink,
-} from "@trpc/client";
-import { ReactNode, useState } from "react";
+import { createTRPCClient, httpBatchLink, httpLink, isNonJsonSerializable, loggerLink, splitLink, } from "@trpc/client";
+import { type ReactNode, useState } from "react";
+import superjson from "superjson";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TRPCProvider } from "@/lib/trpc/client";
@@ -35,8 +29,14 @@ export function Providers({ children }: { children: ReactNode }) {
         loggerLink({ enabled: () => true }),
         splitLink({
           condition: (op) => isNonJsonSerializable(op.input),
-          true: httpLink({ url: `${getBaseUrl()}/api/trpc` }),
-          false: httpBatchLink({ url: `${getBaseUrl()}/api/trpc` }),
+          true: httpLink({
+            url: `${getBaseUrl()}/api/trpc`,
+            transformer: superjson,
+          }),
+          false: httpBatchLink({
+            url: `${getBaseUrl()}/api/trpc`,
+            transformer: superjson,
+          }),
         }),
       ],
     }),
