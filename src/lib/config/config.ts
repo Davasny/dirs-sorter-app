@@ -8,17 +8,16 @@ dotenvConfig({
 
 export const config = createEnv({
   server: {
-    ENVIRONMENT: z.enum(["PROD", "LOCAL"]).default("LOCAL"),
-
     DB_CONNECTION_STRING: z
       .string()
       .default("postgresql://sorter:sorter@localhost:5436/sorter"),
 
+    UPLOADS_DIR_PATH: z.string().nullable().default(null),
   },
 
   runtimeEnv: {
-    ENVIRONMENT: process.env.ENVIRONMENT,
-
     DB_CONNECTION_STRING: process.env.DB_CONNECTION_STRING,
+
+    UPLOADS_DIR_PATH: process.env.UPLOADS_DIR_PATH,
   },
 });

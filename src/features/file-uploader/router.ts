@@ -1,16 +1,19 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import JSZip from "jszip";
+import mime from "mime";
 import { v7 as uuidv7 } from "uuid";
 import { z } from "zod";
 import {
   filesTable,
   type IProjectFileInsert,
 } from "@/features/project-files/db";
+import { config } from "@/lib/config/config";
 import { db } from "@/lib/db/client";
 import { logger } from "@/lib/logger";
 import { publicProcedure, router } from "@/lib/trpc/trpc";
-import mime from "mime";
+
+export const uploadsDir = config.UPLOADS_DIR_PATH || path.join(process.cwd(), "uploads");
 
 export const fileUploaderRouter = router({
   upload: publicProcedure
@@ -24,17 +27,16 @@ export const fileUploaderRouter = router({
       const { zipContent, projectId } = input;
 
       const id = uuidv7();
-      const dir = path.join(process.cwd(), "uploads");
-      const filePath = path.join(dir, `${id}.zip`);
+      const filePath = path.join(uploadsDir, `${id}.zip`);
 
-      await fs.mkdir(dir, { recursive: true });
+      await fs.mkdir(uploadsDir, { recursive: true });
 
       const zipBuffer = Buffer.from(zipContent, "base64");
       await fs.writeFile(filePath, zipBuffer);
 
       logger.info({ msg: "File uploaded", id, filePath });
 
-      const extractDir = path.join(dir, id);
+      const extractDir = path.join(uploadsDir, id);
       await fs.mkdir(extractDir, { recursive: true });
 
       const zip = await JSZip.loadAsync(zipBuffer);
