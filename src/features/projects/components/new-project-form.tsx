@@ -1,17 +1,12 @@
+"use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormMessage, } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useTRPC } from "@/lib/trpc/client";
 
@@ -57,10 +52,9 @@ export const NewProjectForm = () => {
             control={form.control}
             name="name"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Projekt</FormLabel>
+              <FormItem className="flex-1">
                 <FormControl>
-                  <Input {...field} />
+                  <Input placeholder="nazwa projektu" {...field} />
                 </FormControl>
 
                 <FormMessage />
