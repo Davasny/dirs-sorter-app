@@ -19,7 +19,7 @@ export default async function Page({
       </div>
 
       {/* right sidebar */}
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-8 flex-1">
         <FileMetadata projectId={projectId} fileId={fileId} />
         <GroupSelectWrapper
           projectId={projectId}

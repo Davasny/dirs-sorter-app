@@ -1,88 +1,116 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Form } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { NewGroupForm } from "@/features/files-groups/components/new-group-form";
+import { EditGroupsFieldArray } from "@/features/files-groups/components/edit-groups-field-array";
+import { GroupSelectSection } from "@/features/files-groups/components/group-select-section";
+import type { IFilesGroup } from "@/features/files-groups/db";
+import { groupSchema } from "@/features/files-groups/schemas";
 import type { IProjectFile } from "@/features/project-files/db";
 import { useTRPC } from "@/lib/trpc/client";
+
+export type IGroupEditForm = {
+  groups: Array<{ name: string; id?: string }>;
+};
 
 const GroupSelect = ({
   projectId,
   fileMetadata,
+  groups,
 }: {
   projectId: string;
   fileMetadata: IProjectFile;
+  groups: IFilesGroup[];
 }) => {
+  const [inEditMode, setInEditMode] = useState(false);
+
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-
-  const { data: groups } = useQuery(
-    trpc.filesGroups.listGroups.queryOptions({ projectId }),
-  );
-
-  const { mutateAsync: assignFiles } = useMutation(
-    trpc.filesGroups.assignAllFolderFilesToGroup.mutationOptions({
-      onSuccess: () => {
-        void queryClient.invalidateQueries(
-          trpc.projectFiles.listFiles.queryOptions({ projectId }),
-        );
-
-        void queryClient.invalidateQueries(
-          trpc.projectFiles.getFileMetadata.queryOptions({
-            projectId,
-            fileId: fileMetadata.id,
-          }),
-        );
-      },
+  const { mutateAsync: update } = useMutation(
+    trpc.filesGroups.updateGroups.mutationOptions({
+      onSuccess: () =>
+        queryClient.invalidateQueries(
+          trpc.filesGroups.listGroups.queryOptions({ projectId }),
+        ),
     }),
   );
 
-  const onGroupChange = async (groupId: string) => {
+  const form = useForm<IGroupEditForm>({
+    defaultValues: {
+      groups: groups,
+    },
+    resolver: zodResolver(z.object({ groups: z.array(groupSchema).min(1) })),
+  });
+
+  const onSubmit = async (values: IGroupEditForm) => {
     try {
-      await assignFiles({ fileId: fileMetadata.id, groupId, projectId });
-      toast.success("Pliki zostały przypisany do grupy");
+      await update({
+        groups: values.groups,
+        projectId,
+      });
+
+      setInEditMode(false);
     } catch (error) {
-      toast.error("Nie udało się przypisać pliku do grupy", {
+      toast.error("Nie udało się zaktualizować grup", {
         description: (error as Error).message,
       });
     }
   };
 
   return (
-    <div className="flex flex-col gap-2 flex-1 h-full">
-      <Label>Grupa plików</Label>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <div className="flex flex-col gap-2 flex-1 h-full">
+          <div className="flex gap-2 justify-between items-center">
+            <Label>Grupa plików</Label>
 
-      <RadioGroup
-        className="w-full max-w-96 gap-0 -space-y-px rounded-md"
-        onValueChange={onGroupChange}
-        defaultValue={fileMetadata.groupId || ""}
-      >
-        {groups?.map((group) => (
-          <div
-            key={group.id}
-            className="border-input has-data-[state=checked]:border-primary/50 has-data-[state=checked]:bg-accent relative flex flex-col gap-4 border p-4 outline-none first:rounded-t-md last:rounded-b-md has-data-[state=checked]:z-10"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <RadioGroupItem
-                  id={group.id}
-                  value={group.id}
-                  className="after:absolute after:inset-0"
-                />
+            {inEditMode ? (
+              <div className="flex gap-1">
+                <Button
+                  variant="outline"
+                  size="xs"
+                  onClick={() => {
+                    setInEditMode(!inEditMode);
+                    form.reset();
+                  }}
+                >
+                  anuluj
+                </Button>
 
-                <Label className="inline-flex items-center" htmlFor={group.id}>
-                  {group.name}
-                </Label>
+                <Button variant="outline" size="xs" type="submit">
+                  zapisz
+                </Button>
               </div>
-            </div>
+            ) : (
+              <Button
+                variant="outline"
+                size="xs"
+                onClick={() => setInEditMode(!inEditMode)}
+              >
+                edytuj
+              </Button>
+            )}
           </div>
-        ))}
-      </RadioGroup>
 
-      <NewGroupForm projectId={projectId} />
-    </div>
+          {inEditMode && groups ? (
+            <EditGroupsFieldArray />
+          ) : groups ? (
+            <GroupSelectSection
+              projectId={projectId}
+              fileMetadata={fileMetadata}
+              groups={groups}
+            />
+          ) : null}
+        </div>
+      </form>
+    </Form>
   );
 };
 
@@ -94,15 +122,24 @@ export const GroupSelectWrapper = ({
   fileId: string;
 }) => {
   const trpc = useTRPC();
-  const { data: fileMetadata, isLoading: isLoadingFileMetadata } = useQuery(
-    {
-      ...trpc.projectFiles.getFileMetadata.queryOptions({ projectId, fileId }),
-      refetchOnMount: true,
-    }
+  const { data: fileMetadata, isLoading: isLoadingFileMetadata } = useQuery({
+    ...trpc.projectFiles.getFileMetadata.queryOptions({ projectId, fileId }),
+    refetchOnMount: true,
+  });
+
+  const { data: groups } = useQuery(
+    trpc.filesGroups.listGroups.queryOptions({ projectId }),
   );
 
   if (isLoadingFileMetadata) return <p>Ładowanie...</p>;
   if (!fileMetadata) return <p>Nie znaleziono metadanych pliku</p>;
 
-  return <GroupSelect projectId={projectId} fileMetadata={fileMetadata} />;
+  return (
+    <GroupSelect
+      key={JSON.stringify(groups)}
+      projectId={projectId}
+      fileMetadata={fileMetadata}
+      groups={groups || []}
+    />
+  );
 };
