@@ -11,9 +11,10 @@ import { useTRPC } from "@/lib/trpc/client";
 
 export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
   const [files, setFiles] = useState<FileList | null>(null);
+  const [zipSizeMB, setZipSizeMB] = useState<number | null>(null);
 
   const [status, setStatus] = useState<
-    "zipping" | "uploading" | "failed" | "done" | null
+    "zipping" | "savingB64" | "uploading" | "failed" | "done" | null
   >(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -31,6 +32,7 @@ export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
 
   const onSelect = (e: ChangeEvent<HTMLInputElement>) => {
     setFiles(e.target.files);
+    setZipSizeMB(null);
   };
 
   const uploadFiles = async () => {
@@ -56,10 +58,14 @@ export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
         compressionOptions: { level: 6 },
       });
 
-      toast.info("Pliki spakowane do zipa");
+      const sizeInMB = zipBlob.size / (1024 * 1024);
+      setZipSizeMB(sizeInMB);
+      toast.info(`Pliki spakowane do zipa (${sizeInMB.toFixed(2)} MB)`);
+
+      setStatus("savingB64");
+      const base64Zip = await blobToBase64(zipBlob);
 
       setStatus("uploading");
-      const base64Zip = await blobToBase64(zipBlob);
       await upload({
         zipContent: base64Zip,
         projectId,
@@ -67,6 +73,7 @@ export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
 
       toast.success("Pliki wysłane!");
       setFiles(null);
+      setZipSizeMB(null);
 
       if (inputRef.current) {
         inputRef.current.value = "";
@@ -81,7 +88,8 @@ export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
     }
   };
 
-  const inProgress = status === "uploading" || status === "zipping";
+  const inProgress =
+    status === "uploading" || status === "zipping" || status === "savingB64";
 
   return (
     <div className="grid w-full items-center gap-3">
@@ -95,8 +103,15 @@ export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
         onChange={onSelect}
       />
 
-      <div className="text-sm">
-        <span>Status: {status}</span>
+      <div className="text-sm space-y-1">
+        <div>
+          <span>Status: {status ?? "idle"}</span>
+        </div>
+        {zipSizeMB !== null && (
+          <div>
+            <span>ZIP size: {zipSizeMB.toFixed(2)} MB</span>
+          </div>
+        )}
       </div>
 
       <Button
