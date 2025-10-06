@@ -71,14 +71,14 @@ export const ResetPasswordChangePasswordForm = ({token}: { token: string }) => {
         className="flex flex-col gap-8"
         onSubmit={form.handleSubmit(onSubmit)}
       >
-        <h1 className="text-2xl">Reset password</h1>
+        <h1 className="text-2xl">Zmień hasło</h1>
 
         <FormField
           control={form.control}
           name="password"
           render={({field}) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>Hasło</FormLabel>
               <FormControl>
                 <Input type="password" {...field} />
               </FormControl>
@@ -93,7 +93,7 @@ export const ResetPasswordChangePasswordForm = ({token}: { token: string }) => {
           name="confirmPassword"
           render={({field}) => (
             <FormItem>
-              <FormLabel>Confirm password</FormLabel>
+              <FormLabel>Powtórz hasło</FormLabel>
               <FormControl>
                 <Input type="password" {...field} />
               </FormControl>
@@ -105,11 +105,11 @@ export const ResetPasswordChangePasswordForm = ({token}: { token: string }) => {
 
         <div className="flex flex-wrap gap-2 justify-between items-center">
           <Link href="/signin" className="text-sm">
-            Back to login
+            Wróć do logowania
           </Link>
 
           <div className="flex flex-wrap justify-end gap-2">
-            <Button type="submit" loading={inProgress}>Reset</Button>
+            <Button type="submit" loading={inProgress}>Zmień hasło</Button>
           </div>
         </div>
       </form>

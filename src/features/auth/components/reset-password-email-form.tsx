@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -61,7 +62,7 @@ export const ResetPasswordEmailForm = () => {
         className="flex flex-col gap-8"
         onSubmit={form.handleSubmit(onSubmit)}
       >
-        <h1 className="text-2xl">Reset password</h1>
+        <h1 className="text-2xl">Przypomnij hasło</h1>
 
         <FormField
           control={form.control}
@@ -78,8 +79,14 @@ export const ResetPasswordEmailForm = () => {
           )}
         />
 
-        <div className="flex flex-wrap justify-end gap-2">
-          <Button type="submit" loading={inProgress}>Reset</Button>
+        <div className="flex flex-wrap gap-2 justify-between items-center">
+          <Link href="/signin" className="text-sm">
+            Wróć do logowania
+          </Link>
+
+          <div className="flex flex-wrap justify-end gap-2">
+            <Button type="submit" loading={inProgress}>Wyślij</Button>
+          </div>
         </div>
       </form>
     </Form>

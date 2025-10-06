@@ -61,7 +61,7 @@ export const SignUpForm = () => {
         className="flex flex-col gap-8"
         onSubmit={form.handleSubmit(onSubmit)}
       >
-        <h1 className="text-2xl">Sign up</h1>
+        <h1 className="text-2xl">Zarejestruj</h1>
 
         <FormField
           control={form.control}
@@ -83,7 +83,7 @@ export const SignUpForm = () => {
           name="password"
           render={({field}) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>Hasło</FormLabel>
               <FormControl>
                 <Input type="password" {...field} />
               </FormControl>
@@ -98,7 +98,7 @@ export const SignUpForm = () => {
           name="confirmPassword"
           render={({field}) => (
             <FormItem>
-              <FormLabel>Confirm password</FormLabel>
+              <FormLabel>Powtórz hasło</FormLabel>
               <FormControl>
                 <Input type="password" {...field} />
               </FormControl>
@@ -110,11 +110,11 @@ export const SignUpForm = () => {
 
         <div className="flex flex-wrap gap-2 justify-between items-center">
           <Link href="/signin" className="text-sm">
-            Back to login
+            Wróć do logowania
           </Link>
 
           <div className="flex flex-wrap justify-end gap-2">
-            <Button type="submit" loading={inProgress}>Register</Button>
+            <Button type="submit" loading={inProgress}>Zarejestruj</Button>
           </div>
         </div>
       </form>
