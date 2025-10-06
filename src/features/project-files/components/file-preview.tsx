@@ -28,9 +28,9 @@ export const FilePreview = ({
     previewComponent = (
       <ImagePreview fileId={fileId} filePath={fileMetadata.filePath} />
     );
-  } else {
+  } else if (fileMetadata?.mimeType !== null) {
     previewComponent = <RawPreview fileId={fileId} />;
-  }
+  } else previewComponent = <p>Nie można podglądnąć tego pliku.</p>;
 
   return <div className="flex flex-col gap-6 h-full">{previewComponent}</div>;
 };
