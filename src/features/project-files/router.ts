@@ -1,19 +1,22 @@
-import { readFile } from "node:fs/promises";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNotNull } from "drizzle-orm";
 import { z } from "zod";
 import { filesTable } from "@/features/project-files/db";
 import { db } from "@/lib/db/client";
 import { projectProcedure, router } from "@/lib/trpc/trpc";
 
 export const projectFilesRouter = router({
-  listFiles: projectProcedure
-    .query(async (ctx) => {
-      return db
-        .select()
-        .from(filesTable)
-        .where(eq(filesTable.projectId, ctx.input.projectId))
-        .orderBy(filesTable.filePath);
-    }),
+  listFiles: projectProcedure.query(async (ctx) => {
+    return db
+      .select()
+      .from(filesTable)
+      .where(
+        and(
+          eq(filesTable.projectId, ctx.input.projectId),
+          isNotNull(filesTable.deletedAt),
+        ),
+      )
+      .orderBy(filesTable.filePath);
+  }),
 
   getFileMetadata: projectProcedure
     .input(
@@ -29,37 +32,13 @@ export const projectFilesRouter = router({
           and(
             eq(filesTable.id, ctx.input.fileId),
             eq(filesTable.projectId, ctx.input.projectId),
+            isNotNull(filesTable.deletedAt),
           ),
         );
 
       if (!file) return null;
 
       return file;
-    }),
-
-  getFileContent: projectProcedure
-    .input(
-      z.object({
-        fileId: z.string(),
-      }),
-    )
-    .query(async (ctx) => {
-      const [file] = await db
-        .select()
-        .from(filesTable)
-        .where(
-          and(
-            eq(filesTable.id, ctx.input.fileId),
-            eq(filesTable.projectId, ctx.input.projectId),
-          ),
-        );
-
-      if (!file) return null;
-
-      const content = await readFile(file.serverPath);
-      return {
-        fileContent: content.toString("base64"),
-      };
     }),
 
   getNextFolderId: projectProcedure
