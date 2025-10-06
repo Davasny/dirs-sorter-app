@@ -13,7 +13,12 @@ export const ProjectsList = () => {
   return (
     <div className="flex flex-col gap-4">
       <p className="font-bold">Istniejące projekty</p>
-      <div className="flex flex-col gap-4 max-w-md">
+
+      {projects && projects.length === 0 ? (
+        <p>Nie masz jeszcze żadnego projektu</p>
+      ) : null}
+
+      <div className="flex flex-col gap-2 max-w-md">
         {projects?.map((project) => (
           <Link
             href={`/project/${project.id}`}

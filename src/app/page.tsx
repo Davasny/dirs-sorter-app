@@ -3,7 +3,7 @@ import { ProjectsList } from "@/features/projects/components/projects-list";
 
 export default function Page() {
   return (
-    <div className="max-w-md mx-auto p-4 flex flex-col gap-4">
+    <div className="max-w-md mx-auto p-4 flex flex-col gap-12">
       <ProjectsList />
 
       <NewProjectForm />

@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormMessage, } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useTRPC } from "@/lib/trpc/client";
 
@@ -37,6 +37,7 @@ export const NewProjectForm = () => {
   const onSubmit = async (data: INewProjectForm) => {
     try {
       await createProject({ name: data.name });
+      form.reset();
     } catch (error) {
       toast.error("Failed to create project", {
         description: (error as Error).message,
@@ -53,6 +54,7 @@ export const NewProjectForm = () => {
             name="name"
             render={({ field }) => (
               <FormItem className="flex-1">
+                <FormLabel>Nowy projekt</FormLabel>
                 <FormControl>
                   <Input placeholder="nazwa projektu" {...field} />
                 </FormControl>
