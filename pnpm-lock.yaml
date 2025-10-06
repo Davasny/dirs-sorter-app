@@ -14,6 +14,9 @@ importers:
       '@hono/trpc-server':
         specifier: ^0.4.0
         version: 0.4.0(@trpc/server@11.6.0(typescript@5.9.3))(hono@4.9.9)
+      '@hono/zod-validator':
+        specifier: ^0.7.3
+        version: 0.7.3(hono@4.9.9)(zod@4.1.11)
       '@hookform/resolvers':
         specifier: 5.2.2
         version: 5.2.2(react-hook-form@7.63.0(react@19.1.1))
@@ -725,6 +728,12 @@ packages:
     peerDependencies:
       '@trpc/server': ^10.10.0 || >11.0.0-rc
       hono: '>=4.*'
+
+  '@hono/zod-validator@0.7.3':
+    resolution: {integrity: sha512-uYGdgVib3RlGD698WR5dVM0zB3UuPY5vHKXffGUbUh7r4xY+mFIhF3/v4AcQVLrU5CQdBso8BJr4wuVoCrjTuQ==}
+    peerDependencies:
+      hono: '>=3.9.0'
+      zod: ^3.25.0 || ^4.0.0
 
   '@hookform/resolvers@5.2.2':
     resolution: {integrity: sha512-A/IxlMLShx3KjV/HeTcTfaMxdwy690+L/ZADoeaTltLx+CVuzkeVIPuybK3jrRfw7YZnmdKsVVHAlEPIAEUNlA==}
@@ -3356,6 +3365,11 @@ snapshots:
     dependencies:
       '@trpc/server': 11.6.0(typescript@5.9.3)
       hono: 4.9.9
+
+  '@hono/zod-validator@0.7.3(hono@4.9.9)(zod@4.1.11)':
+    dependencies:
+      hono: 4.9.9
+      zod: 4.1.11
 
   '@hookform/resolvers@5.2.2(react-hook-form@7.63.0(react@19.1.1))':
     dependencies:

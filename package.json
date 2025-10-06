@@ -16,6 +16,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.901.0",
     "@hono/trpc-server": "^0.4.0",
+    "@hono/zod-validator": "^0.7.3",
     "@hookform/resolvers": "5.2.2",
     "@radix-ui/react-dialog": "1.1.15",
     "@radix-ui/react-dropdown-menu": "2.1.16",
