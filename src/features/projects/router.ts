@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { projectsTable } from "@/features/projects/db";
 import { db } from "@/lib/db/client";
@@ -8,6 +9,25 @@ export const projectsRouter = router({
     return db.select().from(projectsTable);
   }),
 
+  getProject: publicProcedure
+    .input(
+      z.object({
+        projectId: z.uuidv7(),
+      }),
+    )
+    .query(async (ctx) => {
+      const [project] = await db
+        .select()
+        .from(projectsTable)
+        .where(eq(projectsTable.id, ctx.input.projectId));
+
+      if (!project) {
+        return null;
+      }
+
+      return project;
+    }),
+
   createProject: publicProcedure
     .input(
       z.object({
@@ -15,10 +35,8 @@ export const projectsRouter = router({
       }),
     )
     .mutation(async (ctx) => {
-      return db
-        .insert(projectsTable)
-        .values({
-          name: ctx.input.name,
-        })
+      return db.insert(projectsTable).values({
+        name: ctx.input.name,
+      });
     }),
 });
