@@ -9,7 +9,6 @@ export default async function Layout({
                                      }: Readonly<{
   children: ReactNode;
 }>) {
-  // server side auth check
   const reqHeaders = await headers();
   const session = await auth.api.getSession({headers: reqHeaders});
 
@@ -23,7 +22,7 @@ export default async function Layout({
 
   return (
     <UserProvider user={session.user}>
-      <main>{children}</main>
+      {children}
     </UserProvider>
   );
 }

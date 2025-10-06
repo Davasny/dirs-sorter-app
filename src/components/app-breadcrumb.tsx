@@ -43,7 +43,7 @@ export const AppBreadcrumb = () => {
             <BreadcrumbSeparator />
 
             <BreadcrumbItem>
-              <BreadcrumbLink href={`/src/app/(protected)/project/${projectDetails.id}/`}>
+              <BreadcrumbLink href={`/project/${projectDetails.id}/`}>
                 {projectDetails.name}
               </BreadcrumbLink>
             </BreadcrumbItem>
@@ -56,7 +56,7 @@ export const AppBreadcrumb = () => {
 
             <BreadcrumbItem>
               <BreadcrumbLink
-                href={`/src/app/(protected)/project/${projectDetails.id}/file/${fileMetadata.id}`}
+                href={`/project/${projectDetails.id}/file/${fileMetadata.id}`}
               >
                 {fileMetadata.filePath}
               </BreadcrumbLink>
