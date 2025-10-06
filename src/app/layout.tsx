@@ -10,7 +10,7 @@ const roboto = Roboto({
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="pl" suppressHydrationWarning>
       <body className={`${roboto.variable} antialiased md:h-screen`}>
         <Providers>
           <main className="h-full">{children}</main>
