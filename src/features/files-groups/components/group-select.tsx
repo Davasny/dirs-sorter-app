@@ -11,6 +11,7 @@ import { Form } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
 import { EditGroupsFieldArray } from "@/features/files-groups/components/edit-groups-field-array";
 import { GroupSelectSection } from "@/features/files-groups/components/group-select-section";
+import { NewGroupForm } from "@/features/files-groups/components/new-group-form";
 import type { IFilesGroup } from "@/features/files-groups/db";
 import { groupSchema } from "@/features/files-groups/schemas";
 import type { IProjectFile } from "@/features/project-files/db";
@@ -135,11 +136,15 @@ export const GroupSelectWrapper = ({
   if (!fileMetadata) return <p>Nie znaleziono metadanych pliku</p>;
 
   return (
-    <GroupSelect
-      key={JSON.stringify(groups)}
-      projectId={projectId}
-      fileMetadata={fileMetadata}
-      groups={groups || []}
-    />
+    <div className="flex flex-col gap-2">
+      <GroupSelect
+        key={JSON.stringify(groups)}
+        projectId={projectId}
+        fileMetadata={fileMetadata}
+        groups={groups || []}
+      />
+
+      <NewGroupForm projectId={projectId} />
+    </div>
   );
 };
