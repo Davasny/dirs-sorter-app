@@ -9,7 +9,7 @@ export const ImagePreview = ({
     <img
       src={`/api/files/${fileId}`}
       alt={filePath}
-      className="h-full object-contain border-1 p-2"
+      className="h-full object-contain border-1 p-2 rounded-md"
     />
   );
 };

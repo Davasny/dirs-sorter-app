@@ -11,7 +11,7 @@ export const RawPreview = ({ fileId }: { fileId: string }) => {
   });
 
   return (
-    <pre className="text-sm font-mono whitespace-pre-wrap break-words border-1 p-2">
+    <pre className="text-sm font-mono whitespace-pre-wrap break-words border-1 p-2 rounded-md">
       {fileContent}
     </pre>
   );
