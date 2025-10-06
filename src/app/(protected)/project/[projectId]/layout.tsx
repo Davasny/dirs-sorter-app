@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { AppBreadcrumb } from "@/components/app-breadcrumb";
 import { Separator } from "@/components/ui/separator";
+import { LogoutButton } from "@/features/auth/components/logout-button";
 import { DirectoryUploader } from "@/features/file-uploader/components/directory-uploader";
 import { ProjectFilesList } from "@/features/project-files/components/project-files-list";
 
@@ -24,7 +25,11 @@ export default async function Layout({
       </div>
 
       <div className="flex flex-1 h-full p-2 flex-col gap-2">
-        <AppBreadcrumb />
+        <div className="flex gap-2 justify-between">
+          <AppBreadcrumb/>
+
+          <LogoutButton/>
+        </div>
 
         <div className="bg-[var(--sidebar)] border-1 border-[var(--sidebar-border)] h-full rounded-xl p-4 flex flex-wrap gap-4 overflow-y-auto">
           {children}
