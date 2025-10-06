@@ -2,7 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import JSZip from "jszip";
-import { type ChangeEvent, useRef, useState } from "react";
+import { type ChangeEvent, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,6 +55,7 @@ export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
     setFiles(e.target.files);
     setZipSizeMB(null);
   };
+
   const uploadFiles = async () => {
     if (!files || files.length === 0) {
       toast.error("Please select files first");
@@ -64,11 +65,9 @@ export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
     setStatus("zipping");
     setError(null);
 
-    // helper to split into chunks of given size
-
     try {
       const BATCH_SIZE = 5;
-      const fileArray = Array.from(files); // files: FileList
+      const fileArray = Array.from(files);
       const batches = chunk(fileArray, BATCH_SIZE);
 
       let totalUploaded = 0;
@@ -77,7 +76,7 @@ export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
       for (let b = 0; b < batches.length; b++) {
         const batch = batches[b];
 
-        setStatus(`zipping`);
+        setStatus("zipping");
 
         const zip = new JSZip();
 
@@ -99,13 +98,13 @@ export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
         totalSizeMB += sizeInMB;
 
         toast.info(
-          `Paczka ${b + 1}/${batches.length} spakowany (${sizeInMB.toFixed(2)} MB)`,
+          `Paczka ${b + 1}/${batches.length} spakowana (${sizeInMB.toFixed(2)} MB)`,
         );
 
         setStatus("savingB64");
         const base64Zip = await blobToBase64(zipBlob);
 
-        setStatus(`uploading`);
+        setStatus("uploading");
         await upload({
           zipContent: base64Zip,
           projectId,
@@ -125,10 +124,7 @@ export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
         )} MB łącznie).`,
       );
 
-      // store total zip size across batches if you want to display it
       setZipSizeMB(totalSizeMB);
-
-      // cleanup
       setFiles(null);
 
       if (inputRef.current) {
@@ -148,6 +144,20 @@ export const DirectoryUploader = ({ projectId }: { projectId: string }) => {
 
   const inProgress =
     status === "uploading" || status === "zipping" || status === "savingB64";
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (inProgress) {
+        e.preventDefault();
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [inProgress]);
 
   return (
     <div className="grid w-full items-center gap-3">
