@@ -72,7 +72,7 @@ const FileTreeNode = ({
   if (node.type === "file") {
     return (
       <Link
-        href={`/project/${projectId}/file/${node.fileId}`}
+        href={`/src/app/(protected)/project/${projectId}/file/${node.fileId}`}
         className={cn(
           "flex items-center gap-2 rounded-md px-2 py-1 hover:bg-muted/40 transition-colors font-mono text-sm",
           node.hasGroup ? `font-normal ${COLOR_WITH_GROUP}` : "font-bold",

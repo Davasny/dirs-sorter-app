@@ -9,6 +9,7 @@ import { handle } from "hono/vercel";
 import JSZip from "jszip";
 import path from "path";
 import { z } from "zod";
+import { auth } from "@/features/auth/lib/auth";
 import { filesGroupsTable } from "@/features/files-groups/db";
 import { filesTable } from "@/features/project-files/db";
 import { projectsTable } from "@/features/projects/db";
@@ -30,6 +31,11 @@ app.use(
     createContext: createContext(),
   }),
 );
+
+app.on(["POST", "GET"], "/api/auth/*", (c) => {
+  return auth.handler(c.req.raw);
+});
+
 
 app.get("/api/files/:fileId", async (c) => {
   const { fileId } = c.req.param();

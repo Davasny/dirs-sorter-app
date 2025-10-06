@@ -13,11 +13,19 @@ export const config = createEnv({
       .default("postgresql://sorter:sorter@localhost:5436/sorter"),
 
     UPLOADS_DIR_PATH: z.string().nullable().default(null),
+
+    BETTER_AUTH_SECRET: z.string().nonempty(),
+
+    RESEND_API_KEY: z.string().nonempty(),
   },
 
   runtimeEnv: {
     DB_CONNECTION_STRING: process.env.DB_CONNECTION_STRING,
 
     UPLOADS_DIR_PATH: process.env.UPLOADS_DIR_PATH,
+
+    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
   },
 });
