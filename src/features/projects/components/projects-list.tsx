@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { LogoutButton } from "@/features/auth/components/logout-button";
 import { useTRPC } from "@/lib/trpc/client";
 
 export const ProjectsList = () => {
@@ -12,7 +13,11 @@ export const ProjectsList = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="font-bold">Istniejące projekty</p>
+      <div className="flex justify-between">
+        <p className="font-bold">Twoje projekty</p>
+
+        <LogoutButton/>
+      </div>
 
       {projects && projects.length === 0 ? (
         <p>Nie masz jeszcze żadnego projektu</p>
