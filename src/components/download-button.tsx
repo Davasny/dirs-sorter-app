@@ -89,12 +89,12 @@ export function DownloadGroupButton({ projectId }: Props) {
       }
 
       toast.success("Pobieranie rozpoczęte!");
-    } catch (err: any) {
+    } catch (error) {
       if (controller.signal.aborted) {
         toast.message("Anulowano przygotowanie pliku.");
       } else {
         toast.error("Nie udało się pobrać pliku.");
-        console.error(err);
+        console.error(error);
       }
     } finally {
       setLoading(false);
@@ -115,7 +115,6 @@ export function DownloadGroupButton({ projectId }: Props) {
       >
         {loading ? (
           <span className="inline-flex items-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin" />
             {progress === null
               ? "Przygotowywanie…"
               : `Pobieranie… ${progress}%`}
