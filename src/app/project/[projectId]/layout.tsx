@@ -26,7 +26,7 @@ export default async function Layout({
       <div className="flex flex-1 h-full p-2 flex-col gap-2">
         <AppBreadcrumb />
 
-        <div className="bg-[var(--sidebar)] border-1 border-[var(--sidebar-border)] h-full rounded-xl p-4 flex flex-wrap gap-4">
+        <div className="bg-[var(--sidebar)] border-1 border-[var(--sidebar-border)] h-full rounded-xl p-4 flex flex-wrap gap-4 overflow-y-auto">
           {children}
         </div>
       </div>

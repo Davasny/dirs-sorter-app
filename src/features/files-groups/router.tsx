@@ -70,4 +70,22 @@ export const filesGroupsRouter = router({
           ),
         );
     }),
+
+  listFilesInGroup: publicProcedure
+    .input(
+      z.object({
+        groupId: z.string(),
+        projectId: z.string(),
+      }))
+    .query(async (ctx) => {
+      return db
+        .select()
+        .from(filesTable)
+        .where(
+          and(
+            eq(filesTable.groupId, ctx.input.groupId),
+            eq(filesTable.projectId, ctx.input.projectId),
+          ),
+        );
+    })
 });

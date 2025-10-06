@@ -1,5 +1,5 @@
-import { DirectoryUploader } from "@/features/file-uploader/components/directory-uploader";
-import { ProjectFilesList } from "@/features/project-files/components/project-files-list";
+import { FilesGroupsList } from "@/features/files-groups/components/files-groups-list";
+import { NewGroupForm } from "@/features/files-groups/components/new-group-form";
 
 export default async function Page({
   params,
@@ -9,9 +9,10 @@ export default async function Page({
   const { projectId } = await params;
 
   return (
-    <div className="flex flex-wrap h-full">
-      <div className="flex flex-col gap-8 w-1/4">
-      </div>
+    <div className="flex flex-col w-full gap-8 h-full">
+      <FilesGroupsList projectId={projectId} />
+
+      <NewGroupForm projectId={projectId} />
     </div>
   );
 }

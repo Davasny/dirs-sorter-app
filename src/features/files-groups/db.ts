@@ -22,3 +22,5 @@ export const filesGroupsTable = pgTable(
     ),
   }),
 );
+
+export type IFilesGroup = typeof filesGroupsTable.$inferSelect;
