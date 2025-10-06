@@ -48,10 +48,10 @@ export default function RootLayout({
         splitLink({
           condition: (op) => isNonJsonSerializable(op.input),
           true: httpLink({
-            url: "http://localhost:3000/api/trpc",
+            url: `${window.location.origin}/api/trpc`,
           }),
           false: httpBatchLink({
-            url: "http://localhost:3000/api/trpc",
+            url: `${window.location.origin}/api/trpc`,
           }),
         }),
       ],
