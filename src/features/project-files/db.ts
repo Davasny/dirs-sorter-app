@@ -1,7 +1,13 @@
-import { pgTable, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { v7 as uuidv7 } from "uuid";
-import { projectsTable } from "@/features/projects/db";
 import { filesGroupsTable } from "@/features/files-groups/db";
+import { projectsTable } from "@/features/projects/db";
 
 export const filesTable = pgTable(
   "files",
@@ -11,7 +17,9 @@ export const filesTable = pgTable(
       .primaryKey(),
 
     projectId: uuid("project_id")
-      .references(() => projectsTable.id)
+      .references(() => projectsTable.id, {
+        onDelete: "cascade",
+      })
       .notNull(),
 
     filePath: text("file_path").notNull(),
@@ -21,6 +29,8 @@ export const filesTable = pgTable(
     mimeType: text("mime_type"),
 
     groupId: uuid("group_id").references(() => filesGroupsTable.id),
+
+    deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => ({
     uniqueFilePathPerProject: uniqueIndex("unique_file_path_per_project").on(

@@ -12,7 +12,9 @@ export const filesGroupsTable = pgTable(
     name: text("name").notNull(),
 
     projectId: uuid("project_id")
-      .references(() => projectsTable.id)
+      .references(() => projectsTable.id, {
+        onDelete: "cascade",
+      })
       .notNull(),
   },
   (table) => ({

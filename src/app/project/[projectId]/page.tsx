@@ -1,7 +1,6 @@
 import { DownloadGroupButton } from "@/components/download-button";
 import { Separator } from "@/components/ui/separator";
-import { FilesGroupsList } from "@/features/files-groups/components/files-groups-list";
-import { NewGroupForm } from "@/features/files-groups/components/new-group-form";
+import { RemoveProjectDialog } from "@/features/project-settings/components/remove-project-dialog";
 
 export default async function Page({
   params,
@@ -11,16 +10,16 @@ export default async function Page({
   const { projectId } = await params;
 
   return (
-    <div className="flex flex-col w-full gap-8 h-full">
-      <div>
+    <div className="flex flex-col w-full h-full gap-8">
+      <div className="flex justify-end w-full">
         <DownloadGroupButton projectId={projectId} />
       </div>
 
       <Separator />
 
-      <FilesGroupsList projectId={projectId} />
-
-      <NewGroupForm projectId={projectId} />
+      <div className="flex justify-end w-full">
+        <RemoveProjectDialog projectId={projectId} />
+      </div>
     </div>
   );
 }

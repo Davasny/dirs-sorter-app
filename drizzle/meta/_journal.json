@@ -71,6 +71,13 @@
       "when": 1759688726206,
       "tag": "0009_volatile_wither",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1759777444951,
+      "tag": "0010_hard_saracen",
+      "breakpoints": true
     }
   ]
 }

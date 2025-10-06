@@ -1,13 +1,20 @@
 "use client";
 
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, X } from "lucide-react";
 import * as React from "react";
 import { toast } from "sonner"; // or any toast lib
 import { Button } from "@/components/ui/button";
+import { useTRPC } from "@/lib/trpc/client";
 
 type Props = { projectId: string };
 
 export function DownloadGroupButton({ projectId }: Props) {
+  const trpc = useTRPC();
+  const { data: files } = useQuery(
+    trpc.projectFiles.listFiles.queryOptions({ projectId }),
+  );
+
   const [loading, setLoading] = React.useState(false);
   const [progress, setProgress] = React.useState<number | null>(null);
   const [abortCtrl, setAbortCtrl] = React.useState<AbortController | null>(
@@ -100,7 +107,12 @@ export function DownloadGroupButton({ projectId }: Props) {
 
   return (
     <div className="flex items-center gap-3">
-      <Button onClick={startDownload} disabled={loading} aria-busy={loading}>
+      <Button
+        onClick={startDownload}
+        loading={loading}
+        disabled={loading || files?.length === 0}
+        aria-busy={loading}
+      >
         {loading ? (
           <span className="inline-flex items-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin" />
