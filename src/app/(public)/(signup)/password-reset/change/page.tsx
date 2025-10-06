@@ -1,16 +1,14 @@
-"use client";
-
-import { useSearchParams } from "next/navigation";
 import { ResetPasswordChangePasswordForm } from "@/features/auth/components/reset-password-change-password-form";
 
-export default function Page() {
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+export default function Page({
+                               searchParams,
+                             }: {
+  searchParams: { token?: string };
+}) {
+  const {token} = searchParams;
 
   if (!token) {
-    return (
-      <div>Invalid url</div>
-    )
+    return <div>Invalid url</div>;
   }
 
   return <ResetPasswordChangePasswordForm token={token}/>;
