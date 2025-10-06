@@ -25,7 +25,7 @@ export default async function Layout({
       </div>
 
       <div className="flex flex-1 h-full p-2 flex-col gap-2">
-        <div className="flex gap-2 justify-between">
+        <div className="flex gap-2 justify-between items-center">
           <AppBreadcrumb/>
 
           <LogoutButton/>
