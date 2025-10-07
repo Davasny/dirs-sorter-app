@@ -4,7 +4,10 @@ import JSZip from "jszip";
 import mime from "mime";
 import { v7 as uuidv7 } from "uuid";
 import { z } from "zod";
-import { filesTable, type IProjectFileInsert, } from "@/features/project-files/db";
+import {
+  filesTable,
+  type IProjectFileInsert,
+} from "@/features/project-files/db";
 import { config } from "@/lib/config/config";
 import { db } from "@/lib/db/client";
 import { logger } from "@/lib/logger";

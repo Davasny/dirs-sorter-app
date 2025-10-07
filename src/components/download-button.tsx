@@ -1,7 +1,7 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, X } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { X } from "lucide-react";
 import * as React from "react";
 import { toast } from "sonner"; // or any toast lib
 import { Button } from "@/components/ui/button";

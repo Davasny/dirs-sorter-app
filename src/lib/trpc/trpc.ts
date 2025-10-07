@@ -9,7 +9,7 @@ type ContextOptions = object;
 
 export function createContext(_opts?: ContextOptions) {
   return async ({ req }: FetchCreateContextFnOptions) => {
-    const session = await auth.api.getSession({headers: req.headers});
+    const session = await auth.api.getSession({ headers: req.headers });
 
     return {
       user: session?.user || null,
@@ -27,7 +27,7 @@ const t = initTRPC.context<Context>().create({
 export const router = t.router;
 export const publicProcedure = t.procedure;
 
-export const protectedProcedure = publicProcedure.use(async ({ctx, next}) => {
+export const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
   if (!ctx.user?.id) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
@@ -41,18 +41,19 @@ export const protectedProcedure = publicProcedure.use(async ({ctx, next}) => {
   });
 });
 
-export const projectProcedure = protectedProcedure.input(z.object({projectId: z.uuidv7()})).use(
-  async ({ctx, next, input}) => {
+export const projectProcedure = protectedProcedure
+  .input(z.object({ projectId: z.uuidv7() }))
+  .use(async ({ ctx, next, input }) => {
     // if input has no projectId, throw error
     if (!input || typeof input !== "object" || !("projectId" in input)) {
       throw new TRPCError({
         code: "BAD_REQUEST",
         message: "Missing projectId in input",
-        cause: input
+        cause: input,
       });
     }
 
-    const {projectId} = input as { projectId: string };
+    const { projectId } = input as { projectId: string };
     const hasAccess = await checkUserProjectAccess({
       userId: ctx.user.id,
       projectId,
@@ -65,6 +66,5 @@ export const projectProcedure = protectedProcedure.input(z.object({projectId: z.
       });
     }
 
-    return next({ctx});
-  },
-);
+    return next({ ctx });
+  });

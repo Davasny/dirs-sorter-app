@@ -28,7 +28,7 @@ type IPasswordResetForm = z.infer<typeof passwordResetSchema>;
 export const ResetPasswordEmailForm = () => {
   const [inProgress, setInProgress] = useState(false);
 
-  const {push} = useRouter();
+  const { push } = useRouter();
 
   const form = useForm<IPasswordResetForm>({
     defaultValues: {
@@ -40,7 +40,7 @@ export const ResetPasswordEmailForm = () => {
   const onSubmit = async (data: IPasswordResetForm) => {
     setInProgress(true);
 
-    const {error} = await authClient.requestPasswordReset({
+    const { error } = await authClient.requestPasswordReset({
       email: data.email,
       redirectTo: `${window.location.origin}/password-reset/change`,
     });
@@ -67,14 +67,14 @@ export const ResetPasswordEmailForm = () => {
         <FormField
           control={form.control}
           name="email"
-          render={({field}) => (
+          render={({ field }) => (
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
                 <Input type="email" {...field} />
               </FormControl>
 
-              <FormMessage/>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -85,7 +85,9 @@ export const ResetPasswordEmailForm = () => {
           </Link>
 
           <div className="flex flex-wrap justify-end gap-2">
-            <Button type="submit" loading={inProgress}>Wyślij</Button>
+            <Button type="submit" loading={inProgress}>
+              Wyślij
+            </Button>
           </div>
         </div>
       </form>

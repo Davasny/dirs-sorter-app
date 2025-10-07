@@ -6,7 +6,7 @@ export function uuidToTimestamp(uuid: string): Date {
   const timestampHex = hex.substring(0, 12);
 
   // Convert hex to integer (BigInt, because it can exceed Number range)
-  const timestampMs = BigInt("0x" + timestampHex);
+  const timestampMs = BigInt(`0x${timestampHex}`);
 
   // Convert to normal Date
   return new Date(Number(timestampMs));

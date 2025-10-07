@@ -40,7 +40,7 @@ export const FileMetadata = ({
           disabled={nextDir === null}
           onClick={() => push(`/project/${projectId}/file/${nextDir}`)}
         >
-          {nextDir === null ? <>Brak następnego folderu</> : <>Następny folder</>}
+          {nextDir === null ? "Brak następnego folderu" : "Następny folder"}
         </Button>
       </div>
 

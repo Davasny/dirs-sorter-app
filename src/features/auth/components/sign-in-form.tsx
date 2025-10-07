@@ -29,7 +29,7 @@ type ISignInForm = z.infer<typeof signinSchema>;
 export const SignInForm = () => {
   const [inProgress, setInProgress] = useState(false);
 
-  const {push} = useRouter()
+  const { push } = useRouter();
 
   const form = useForm<ISignInForm>({
     defaultValues: {
@@ -40,21 +40,21 @@ export const SignInForm = () => {
   });
 
   const onSubmit = async (data: ISignInForm) => {
-    setInProgress(true)
+    setInProgress(true);
 
-    const {error} = await authClient.signIn.email({
+    const { error } = await authClient.signIn.email({
       email: data.email,
       password: data.password,
     });
 
-    setInProgress(false)
+    setInProgress(false);
 
     if (error) {
       toast.error("Login failed", {
         description: error.message,
       });
     } else {
-      push("/")
+      push("/");
     }
   };
 
@@ -69,14 +69,14 @@ export const SignInForm = () => {
         <FormField
           control={form.control}
           name="email"
-          render={({field}) => (
+          render={({ field }) => (
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
                 <Input type="email" {...field} />
               </FormControl>
 
-              <FormMessage/>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -84,14 +84,14 @@ export const SignInForm = () => {
         <FormField
           control={form.control}
           name="password"
-          render={({field}) => (
+          render={({ field }) => (
             <FormItem>
               <FormLabel>Hasło</FormLabel>
               <FormControl>
                 <Input type="password" {...field} />
               </FormControl>
 
-              <FormMessage/>
+              <FormMessage />
             </FormItem>
           )}
         />

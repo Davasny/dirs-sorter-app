@@ -1,15 +1,15 @@
 import { createHash } from "node:crypto";
+import fs from "node:fs/promises";
+import path from "node:path";
 import { trpcServer } from "@hono/trpc-server";
 import { zValidator } from "@hono/zod-validator";
 import contentDisposition from "content-disposition";
 import { and, eq, isNull } from "drizzle-orm";
-import fs from "fs/promises";
 import { Hono } from "hono";
 import { handle } from "hono/vercel";
 import JSZip from "jszip";
-import path from "path";
 import { z } from "zod";
-import { auth, IUser } from "@/features/auth/lib/auth";
+import { auth, type IUser } from "@/features/auth/lib/auth";
 import { checkUserProjectAccess } from "@/features/auth/utils/check-user-project-access";
 import { filesGroupsTable } from "@/features/files-groups/db";
 import { filesTable } from "@/features/project-files/db";
@@ -42,7 +42,7 @@ app.on(["POST", "GET"], "/api/auth/*", (c) => {
 });
 
 app.use("/api/authorized/*", async (c, next) => {
-  const session = await auth.api.getSession({headers: c.req.raw.headers});
+  const session = await auth.api.getSession({ headers: c.req.raw.headers });
 
   if (!session) {
     return c.json(
@@ -68,13 +68,13 @@ app.use(
     }),
   ),
   async (c, next) => {
-    const {projectId} = c.req.param()
+    const { projectId } = c.req.param();
     const user = c.get("user");
 
     const hasAccess = await checkUserProjectAccess({
       userId: user.id,
       projectId,
-    })
+    });
 
     if (!hasAccess) {
       return c.json(
@@ -99,20 +99,19 @@ app.get(
     }),
   ),
   async (c) => {
-    const {projectId, fileId} = c.req.valid("param");
+    const { projectId, fileId } = c.req.valid("param");
 
     // Fetch file path from DB
     const [file] = await db
       .select()
       .from(filesTable)
-      .where(and(
-        eq(filesTable.id, fileId),
-        eq(filesTable.projectId, projectId)
-      ))
+      .where(
+        and(eq(filesTable.id, fileId), eq(filesTable.projectId, projectId)),
+      )
       .limit(1);
 
     if (!file) {
-      return c.json({msg: "File not found"}, 404);
+      return c.json({ msg: "File not found" }, 404);
     }
 
     try {
@@ -144,7 +143,7 @@ app.get(
       });
     } catch (err) {
       console.error("Error reading file:", err);
-      return c.json({msg: "Error reading file"}, 500);
+      return c.json({ msg: "Error reading file" }, 500);
     }
   },
 );
@@ -176,10 +175,12 @@ app.get(
       const files = await db
         .select()
         .from(filesTable)
-        .where(and(
-          eq(filesTable.projectId, projectId),
-          isNull(filesTable.deletedAt)
-        ));
+        .where(
+          and(
+            eq(filesTable.projectId, projectId),
+            isNull(filesTable.deletedAt),
+          ),
+        );
 
       if (files.length === 0) {
         logger.warn({ msg: "No files found for project", projectId });
@@ -289,7 +290,7 @@ app.get(
         "Content-Length": zipBuffer.length.toString(),
       };
 
-      logger.info({msg: "Sending ZIP file", projectId, zipName, headers});
+      logger.info({ msg: "Sending ZIP file", projectId, zipName, headers });
 
       return c.body(Buffer.from(zipBuffer), 200, headers);
     } catch (error) {

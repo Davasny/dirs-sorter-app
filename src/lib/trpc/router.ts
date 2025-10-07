@@ -8,7 +8,7 @@ export const appRouter = router({
   fileUpload: fileUploaderRouter,
   projects: projectsRouter,
   projectFiles: projectFilesRouter,
-  filesGroups: filesGroupsRouter
+  filesGroups: filesGroupsRouter,
 });
 
 export type AppRouter = typeof appRouter;

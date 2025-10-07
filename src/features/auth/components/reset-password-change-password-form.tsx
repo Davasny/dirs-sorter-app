@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -32,7 +32,11 @@ const resetPasswordSchema = z
 
 type IResetPasswordForm = z.infer<typeof resetPasswordSchema>;
 
-export const ResetPasswordChangePasswordForm = ({token}: { token: string }) => {
+export const ResetPasswordChangePasswordForm = ({
+  token,
+}: {
+  token: string;
+}) => {
   const [inProgress, setInProgress] = useState(false);
 
   const form = useForm<IResetPasswordForm>({
@@ -43,12 +47,12 @@ export const ResetPasswordChangePasswordForm = ({token}: { token: string }) => {
     resolver: zodResolver(resetPasswordSchema),
   });
 
-  const {push} = useRouter();
+  const { push } = useRouter();
 
   const onSubmit = async (data: IResetPasswordForm) => {
     setInProgress(true);
 
-    const {error} = await authClient.resetPassword({
+    const { error } = await authClient.resetPassword({
       token,
       newPassword: data.password,
     });
@@ -76,14 +80,14 @@ export const ResetPasswordChangePasswordForm = ({token}: { token: string }) => {
         <FormField
           control={form.control}
           name="password"
-          render={({field}) => (
+          render={({ field }) => (
             <FormItem>
               <FormLabel>Hasło</FormLabel>
               <FormControl>
                 <Input type="password" {...field} />
               </FormControl>
 
-              <FormMessage/>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -91,14 +95,14 @@ export const ResetPasswordChangePasswordForm = ({token}: { token: string }) => {
         <FormField
           control={form.control}
           name="confirmPassword"
-          render={({field}) => (
+          render={({ field }) => (
             <FormItem>
               <FormLabel>Powtórz hasło</FormLabel>
               <FormControl>
                 <Input type="password" {...field} />
               </FormControl>
 
-              <FormMessage/>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -109,7 +113,9 @@ export const ResetPasswordChangePasswordForm = ({token}: { token: string }) => {
           </Link>
 
           <div className="flex flex-wrap justify-end gap-2">
-            <Button type="submit" loading={inProgress}>Zmień hasło</Button>
+            <Button type="submit" loading={inProgress}>
+              Zmień hasło
+            </Button>
           </div>
         </div>
       </form>

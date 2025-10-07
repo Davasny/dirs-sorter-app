@@ -1,9 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import type { IFilesGroup } from "@/features/files-groups/db";
-import { IProjectFile } from "@/features/project-files/db";
+import type { IProjectFile } from "@/features/project-files/db";
 import { useTRPC } from "@/lib/trpc/client";
 
 export const GroupSelectSection = ({
@@ -12,7 +12,7 @@ export const GroupSelectSection = ({
   groups,
 }: {
   projectId: string;
-  groups: IFilesGroup[]
+  groups: IFilesGroup[];
   fileMetadata: IProjectFile;
 }) => {
   const trpc = useTRPC();
@@ -45,7 +45,6 @@ export const GroupSelectSection = ({
       });
     }
   };
-
 
   return (
     <RadioGroup

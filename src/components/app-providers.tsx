@@ -1,7 +1,14 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createTRPCClient, httpBatchLink, httpLink, isNonJsonSerializable, loggerLink, splitLink, } from "@trpc/client";
+import {
+  createTRPCClient,
+  httpBatchLink,
+  httpLink,
+  isNonJsonSerializable,
+  loggerLink,
+  splitLink,
+} from "@trpc/client";
 import { type ReactNode, useState } from "react";
 import superjson from "superjson";
 import { ThemeProvider } from "@/components/theme-provider";
