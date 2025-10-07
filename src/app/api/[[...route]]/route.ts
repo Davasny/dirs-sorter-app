@@ -15,10 +15,10 @@ import { filesGroupsTable } from "@/features/files-groups/db";
 import { filesTable } from "@/features/project-files/db";
 import { projectsTable } from "@/features/projects/db";
 import { db } from "@/lib/db/client";
-import { uuidToTimestamp } from "@/lib/extractTimestampFromUUIDv7";
 import { logger } from "@/lib/logger";
 import { appRouter } from "@/lib/trpc/router";
 import { createContext } from "@/lib/trpc/trpc";
+import { uuidToTimestamp } from "@/lib/uuid-to-timestamp";
 
 export const runtime = "nodejs";
 
