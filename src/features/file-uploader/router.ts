@@ -35,16 +35,12 @@ export const fileUploaderRouter = router({
 
       await fs.mkdir(uploadsDir, { recursive: true });
 
-      logger.info({ msg: "Writing ZIP file to disk", filePath });
-
-      const zipBuffer = Buffer.from(zipContent, "base64");
-      await fs.writeFile(filePath, zipBuffer);
-
-      logger.info({ msg: "File uploaded", id, filePath });
+      logger.info({ msg: "Received new file", id, filePath });
 
       const extractDir = path.join(uploadsDir, id);
       await fs.mkdir(extractDir, { recursive: true });
 
+      const zipBuffer = Buffer.from(zipContent, "base64");
       const zip = await JSZip.loadAsync(zipBuffer);
       const newFiles: IProjectFileInsert[] = [];
 
@@ -104,6 +100,8 @@ export const fileUploaderRouter = router({
       if (newFiles.length > 0) {
         await db.insert(filesTable).values(newFiles).onConflictDoNothing();
       }
+
+      logger.info({ msg: "Zip file extracted" });
 
       return { id, filePath, filesSaved: newFiles.length };
     }),
