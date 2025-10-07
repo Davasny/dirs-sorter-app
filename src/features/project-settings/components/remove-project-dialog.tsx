@@ -39,7 +39,7 @@ export const RemoveProjectDialog = ({ projectId }: { projectId: string }) => {
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger>
+      <AlertDialogTrigger asChild>
         <Button variant="destructive">Usuń projekt</Button>
       </AlertDialogTrigger>
 
