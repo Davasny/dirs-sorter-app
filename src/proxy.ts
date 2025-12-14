@@ -1,11 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/features/auth/lib/auth";
 
-export const runtime = "nodejs";
-
 const AUTH_PAGES = ["/signin", "/signup", "/password-reset"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isAuthPage = AUTH_PAGES.some((page) => pathname.startsWith(page));

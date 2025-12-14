@@ -44,16 +44,7 @@ export const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
 export const projectProcedure = protectedProcedure
   .input(z.object({ projectId: z.uuidv7() }))
   .use(async ({ ctx, next, input }) => {
-    // if input has no projectId, throw error
-    if (!input || typeof input !== "object" || !("projectId" in input)) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "Missing projectId in input",
-        cause: input,
-      });
-    }
-
-    const { projectId } = input as { projectId: string };
+    const { projectId } = input;
     const hasAccess = await checkUserProjectAccess({
       userId: ctx.user.id,
       projectId,

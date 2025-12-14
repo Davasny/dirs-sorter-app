@@ -4,6 +4,7 @@ import { z } from "zod";
 
 dotenvConfig({
   path: ".env.local",
+  quiet: true,
 });
 
 export const config = createEnv({
